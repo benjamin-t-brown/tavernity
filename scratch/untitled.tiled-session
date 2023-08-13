@@ -1,0 +1,43 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "untitled.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 4
+        },
+        "#Sprite-0001": {
+            "scaleInEditor": 1
+        },
+        "untitled.tmx": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 235.25,
+                "y": 206
+            }
+        },
+        "untitled.tmx#Sprite-0001": {
+            "scaleInDock": 4
+        }
+    },
+    "last.imagePath": "C:/progs/tavernity",
+    "map.height": 30,
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "untitled.tmx"
+    ],
+    "project": "untitled.tiled-project",
+    "recentFiles": [
+        "untitled.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}

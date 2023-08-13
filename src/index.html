@@ -1,0 +1,61 @@
+<html>
+  <head><title>Tavernity</title></head>
+  <body>
+    <style>
+      body {
+        background: #333;
+        margin: 0px;
+        font-family: monospace;
+        overflow: hidden;
+      }
+      canvas {
+        border: 1px solid white;
+      }
+      #canvasDiv {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+      }
+      #canvasDiv>div {
+        color: white;
+        display: flex;
+        align-items: center;
+        margin: 4px;
+      }
+      #modal {
+        position: fixed;
+        background: rgba(0, 0, 0, 0.75);
+        padding: 25px;
+        font-size: 24px;
+        transform: translateY(-100%);
+      }
+      @keyframes fl {
+        from {color: black}
+        to {color: white;}
+      }
+      .anim {
+        animation: fl 0.5s linear infinite;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        margin: 8px;
+        font-size: 14px;
+      }
+    </style>
+    <div id="canvasDiv">
+      <!-- <div>Scale: <input id="volume" type="range" min="0" max="100" value="100" onchange="vol(this)"></input></div> -->
+      <div>Volume: <input id="volume" type="range" min="0" max="100" value="100" onchange="vol(this)"></input></div>
+      <div id="modal"></div>
+      <div>Arrows (move) Space (interact)</div>
+      <div>+/- (zoom)</div>
+      <!-- <div class="modal-p">
+        <div id="modal">
+
+        </div>
+      </div> -->
+    </div>
+    <script src="index.ts" type="module"></script>
+  </body>
+</html>
