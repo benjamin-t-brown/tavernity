@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="3" nextobjectid="1">
+<map version="1.10" tiledversion="1.10.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="7">
  <editorsettings>
   <export target="map.js" format="js"/>
  </editorsettings>
@@ -40,4 +40,12 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="3" name="Object Layer 1">
+  <object id="1" gid="33" x="240" y="384" width="16" height="16"/>
+  <object id="2" gid="33" x="112" y="352" width="16" height="16"/>
+  <object id="3" gid="33" x="320" y="384" width="16" height="16"/>
+  <object id="4" gid="33" x="464" y="352" width="16" height="16"/>
+  <object id="5" gid="33" x="96" y="16" width="16" height="16"/>
+  <object id="6" gid="33" x="112" y="16" width="16" height="16"/>
+ </objectgroup>
 </map>

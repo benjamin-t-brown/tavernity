@@ -155,14 +155,12 @@ const spriteToCanvas = (sprite: Sprite): HTMLCanvasElement => {
   return canvas;
 };
 
-const loadSpritesheets = (
+const loadSpritesheet = (
   spriteMap: SpriteCollection,
   image: HTMLImageElement,
-  spritePrefixes: string[],
+  spritePrefix: string,
   spriteWidth: number,
-  spriteHeight: number,
-  subWidth: number,
-  subHeight: number
+  spriteHeight: number
 ) => {
   const createSprite = (
     name: string,
@@ -177,94 +175,21 @@ const loadSpritesheets = (
     return (spriteMap[name] = [canvas, 0, 0, w, h]);
   };
 
-  const addRotated = (
-    sprite: HTMLCanvasElement,
-    baseSpriteName: string,
-    n: number
-  ) => {
-    let rotated: HTMLCanvasElement = sprite;
-    for (let i = 0; i < n; i++) {
-      rotated = createRotatedImg(rotated);
-    }
-    const sprName = `${baseSpriteName}_r${n}`;
-    createSprite(sprName, rotated, 0, 0, spriteWidth, spriteHeight);
-  };
-
-  const addBrightChanged = (
-    sprite: HTMLCanvasElement,
-    baseSpriteName: string,
-    postFix: string,
-    brightnessNum: number
-  ) => {
-    const [canvas, ctx] = createCanvas(sprite.width, sprite.height);
-    ctx.filter = `brightness(${brightnessNum})`;
-    ctx.drawImage(sprite, 0, 0);
-    createSprite(
-      `${baseSpriteName}_${postFix}`,
-      canvas,
-      0,
-      0,
-      spriteWidth,
-      spriteHeight
-    );
-  };
-
-  let oldSpriteWidth = spriteWidth;
-
-  for (let subY = 0; subY < subHeight; subY++) {
-    for (let subX = 0; subX < subWidth; subX++) {
-      const spritePrefix = spritePrefixes[subY * subWidth + subX];
-      let ctr = 0;
-
-      if (spritePrefix === 'map') {
-        spriteWidth = spriteHeight = 8;
-      }
-
-      const numColumns = image.width / spriteWidth;
-      const numRows = image.height / spriteHeight;
-      const numColumnsPerSubsection = numColumns / subWidth;
-      const numRowsPerSubsection = numRows / subHeight;
-
-      for (let i = 0; i < numRowsPerSubsection; i++) {
-        for (let j = 0; j < numColumnsPerSubsection; j++) {
-          const baseSpriteName = `${spritePrefix}_${ctr}`;
-          const sprite = createSprite(
-            baseSpriteName,
-            image,
-            subX * spriteWidth * numColumnsPerSubsection + j * spriteWidth,
-            subY * spriteHeight * numRowsPerSubsection + i * spriteHeight,
-            spriteWidth,
-            spriteHeight
-          );
-
-          if (spritePrefix !== 't1') {
-            addRotated(spriteToCanvas(sprite), baseSpriteName, 1);
-            addRotated(spriteToCanvas(sprite), baseSpriteName, 2);
-            addRotated(spriteToCanvas(sprite), baseSpriteName, 3);
-            const flipped = createFlippedImg(spriteToCanvas(sprite));
-            createSprite(
-              `${baseSpriteName}_f`,
-              flipped,
-              0,
-              0,
-              spriteWidth,
-              spriteHeight
-            );
-          }
-          ctr++;
-        }
-      }
-    }
-  }
-
-  const spriteNames = Object.keys(spriteMap as Record<string, Sprite>);
-  spriteWidth = spriteHeight = oldSpriteWidth;
-
-  for (const baseSpriteName of spriteNames) {
-    const canvas = (spriteMap as Record<string, Sprite>)[baseSpriteName][0];
-    if (baseSpriteName.includes('a1') || baseSpriteName.includes('a2')) {
-      addBrightChanged(canvas, baseSpriteName, 'b', 5);
-      addBrightChanged(canvas, baseSpriteName, 'd', 0.1);
+  const numSpritesX = image.width / spriteWidth;
+  const numSpritesY = image.height / spriteHeight;
+  for (let i = 0; i < numSpritesY; i++) {
+    for (let j = 0; j < numSpritesX; j++) {
+      const spriteName = `${spritePrefix}_${i * numSpritesX + j}`;
+      const s = createSprite(
+        spriteName,
+        image,
+        j * spriteWidth,
+        i * spriteHeight,
+        spriteWidth,
+        spriteHeight
+      );
+      const flipped = createFlippedImg(spriteToCanvas(s));
+      createSprite(`${spriteName}_f`, flipped, 0, 0, spriteWidth, spriteHeight);
     }
   }
 };
@@ -274,38 +199,17 @@ export const loadImagesAndSprites = async (images: any[]) => {
   const imageMap = {};
   const spriteMap = {};
   await Promise.all(
-    images.map(
-      (
-        [
-          imageName,
-          imagePath,
-          spriteWidth,
-          spriteHeight,
-          subWidth,
-          subHeight,
-          spritePrefixes,
-        ],
-        i
-      ) => {
-        return new Promise<void>(resolve => {
-          const img = new Image();
-          img.onload = () => {
-            imageMap[imageName] = img;
-            loadSpritesheets(
-              spriteMap,
-              img,
-              spritePrefixes,
-              spriteWidth,
-              spriteHeight,
-              subWidth,
-              subHeight
-            );
-            resolve();
-          };
-          img.src = imagePath;
-        });
-      }
-    )
+    images.map(([imageName, imagePath, spriteWidth, spriteHeight], i) => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          imageMap[imageName] = img;
+          loadSpritesheet(spriteMap, img, 's', spriteWidth, spriteHeight);
+          resolve();
+        };
+        img.src = imagePath;
+      });
+    })
   );
 
   model_images = imageMap;

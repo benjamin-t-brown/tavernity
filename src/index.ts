@@ -18,26 +18,23 @@ window.addEventListener('load', () => {
 
 const EXPECTED_FS = 10;
 export const start = async () => {
-  console.log('game started2');
   load();
 };
 
 const load = async () => {
   console.log('loading...');
-  await loadImagesAndSprites([
-    ['packed', 'res/sprites.png', 16, 16, 1, 1, ['s']],
-  ]);
-  console.log('loaded');
+  await loadImagesAndSprites([['sprite', 'res/sprite.png', 16, 16]]);
+  const map = await (await fetch('res/map.json')).json();
+  console.log('loaded', map);
   initDb();
 
   const cWidth = Number(localStorage.getItem('js13k2023_tavernity_width'));
   if (!isNaN(cWidth) && cWidth > 0) {
-    console.log('SET CWIDTH', cWidth);
     const canvas = getCanvas();
     canvas.style.width = cWidth + 'px';
   }
 
-  loop(createGame());
+  loop(createGame(map.tiles, map.width, map.spawns));
 };
 
 const loop = (game: Game) => {

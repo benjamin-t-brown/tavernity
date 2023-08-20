@@ -22,11 +22,11 @@ export const initDbAnims = () => {
     ['p_walk', ['s_3']],
     ['p_wait', ['s_3', 's_4']],
     ['p_angry', ['s_7', 's_8']],
-  ]
+  ];
 
   for (const [name, sprites] of lrAnims) {
     addAnim(name + '_l', 't 300 ' + sprites.join(' '));
-    addAnim(name + '_r', 't 300 ' + sprites.map(s => s + '_f').join(' '));
+    addAnim(name + '_r', 't 300 ' + sprites.map((s) => s + '_f').join(' '));
   }
 
   addAnim('fire', 't 150 s_14 s_15');
@@ -49,7 +49,7 @@ export const createAnimationFromDb = (animName: string) => {
   return createAnimation([
     loop === 't',
     animName,
-    sprites.map(s => {
+    sprites.map((s) => {
       return {
         n: s,
         d: ms,
@@ -64,4 +64,14 @@ export const getSound = (soundName: string) => {
     throw new Error('No sound: ' + soundName);
   }
   return s;
+};
+
+export const FLOOR_TILES = [12, 14, 27];
+
+export const isFloorTile = (tileId: number) => {
+  return FLOOR_TILES.includes(tileId);
+};
+
+export const isWallTile = (tileId: number) => {
+  return !isFloorTile(tileId);
 };

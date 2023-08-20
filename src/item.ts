@@ -1,5 +1,5 @@
+import { Actor, createActor } from './actor';
 import { drawSprite } from './draw';
-import { Actor, createActor } from './utils';
 
 export interface Item extends Actor {
   name: ItemName;
@@ -11,11 +11,9 @@ export type ItemName =
   | 'sword'
   | 'buoy'
   | 'hammer'
-  | 'bucketFull'
+  | 'bucketFull';
 
-export const itemNameToLabelObj = (
-  itemName: ItemName
-): string => {
+export const itemNameToLabelObj = (itemName: ItemName): string => {
   const labels: Record<ItemName, string> = {
     mugEmpty: 'Mug',
     mugFull: 'Mug',
@@ -32,11 +30,15 @@ export const itemNameToSprite = (itemName: ItemName) => {
     (() => {
       switch (itemName) {
         case 'mugEmpty':
+          return 's_29';
         case 'mugFull':
+          return 's_30';
         case 'sword':
+          return 's_31';
         case 'buoy':
+          return 's_32';
         case 'bucketFull':
-          return 's_0';
+          return 's_33';
       }
     })() ?? 's_0'
   );
@@ -50,7 +52,6 @@ export const createItem = (itemName: ItemName, x: number, y: number) => {
     name: itemName,
     x,
     y,
-    getRect: () => [cl.x, cl.y, cl.x + 16, cl.y + 16],
     draw() {
       drawSprite(sprite, cl.x, cl.y, cl.scale);
     },

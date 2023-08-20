@@ -1,6 +1,7 @@
+import { Actor, createActor } from './actor';
 import { createAnimationFromDb } from './db';
 import { drawSprite } from './draw';
-import { Actor, Timer, createActor } from './utils';
+import { Timer } from './utils';
 
 export interface Particle extends Actor {}
 

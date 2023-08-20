@@ -1,13 +1,6 @@
 import { Particle, createParticle } from './particle';
 import { Player, createPlayer } from './player';
-import {
-  Actor,
-  Timer,
-  isKeyDown,
-  isPointInRect,
-  playSound,
-  rectRectCollision,
-} from './utils';
+import { Point, Timer, isKeyDown, playSound } from './utils';
 import {
   ROOM_HEIGHT_IN_TILES,
   ROOM_WIDTH_IN_TILES,
@@ -26,10 +19,12 @@ import {
 import { Item, ItemName, createItem, itemNameToSprite } from './item';
 import { getModalText } from './utils';
 import { rand } from './zzfx';
+import { Actor } from './actor';
 
 export interface Game {
   cx: number;
   cy: number;
+  scale: number;
   room: Room;
   getPlayer: () => Player;
   setup: () => void;
@@ -41,8 +36,9 @@ export const getGame = (): Game => {
   return (window as any).game;
 };
 
-export function createGame() {
+export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
   let player: Player;
+  const room: Room = createRoom(tiles, mapWidth);
 
   const updateActorArray = (arr: Actor[]) => {
     for (let i = 0; i < arr.length; i++) {
@@ -65,24 +61,26 @@ export function createGame() {
   const cl: Game = {
     cx: 0,
     cy: 0,
-    room: null as any,
+    scale: 1,
+    room,
     setup() {
       player = (window as any).player = createPlayer();
       if (cl.room) {
         cl.room.reset();
       }
     },
-    getPlayer(){
+    getPlayer() {
       return player;
     },
     update(fm: number) {
-
+      player.update();
     },
     draw() {
       const canvas = getCanvas();
       const ctx = getCtx();
-      let scale = 4;
-     
+
+      cl.room.draw();
+      player.draw();
     },
   };
 

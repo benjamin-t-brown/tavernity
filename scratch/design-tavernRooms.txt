@@ -1,0 +1,19 @@
+The Tavern
+
+To create complexity and escalate the game as time goes on, the tavern expands with additional rooms.  The first room includes the simplest slice of the game, one where there is only a few tables, some mugs, a keg, and an outdoor area.  This eventually expands to multiple rooms with weapons racks and additional outside areas.
+
+Technical Details
+
+Data Model
+    - The whole map is created in Tiled and represented as a 1d array.
+    - On load, the map is segmented into rooms, creating new "maps" bounded by the max width of the room.
+        - To segment the map, a fill algorithm is used.  The fill algorithm goes through each continuous set of floors until the whole area is filled, then marks that zone with a number.  Then it searches through the map for an unmarked set of floors before repeating the fill.  This is done until no more unmarked floors are found.
+        - After segmentation, go through each in order of how they are added and mark any adjacent walls/doors as part of the room.  
+            - The order of how they appear is manually defined based on how the floors are marked.  Rooms are marked with numbers having started the search from the top left first.  So room 1 will be the upper-left most room, but it may not be the first room shown at level 1.
+            - Track which rooms are adjacent to each door.  This information is used to determine if the door should spawn or if it should spawn as a wall depending on which rooms are visible.
+
+Game Play
+    - When the game is started, load the room first in order.  When that level is completed, superimpose the next room onto the map, and so on until no more rooms remain.
+
+Visibility
+    - The player can only see the tiles of the room they are standing in.  If they are standing in a doorway, they can see any adjacent room tiles.

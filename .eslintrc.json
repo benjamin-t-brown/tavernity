@@ -4,18 +4,25 @@
     "es6": true,
     "node": true
   },
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "parserOptions": {
     "ecmaVersion": 2022,
     "sourceType": "module"
   },
   "plugins": [
-    "prettier"
+    "prettier",
+    "@typescript-eslint"
   ],
-  "ignorePatterns": ["dist/", "scripts/"],
+  "ignorePatterns": [
+    "dist/",
+    "scripts/"
+  ],
   "rules": {
     "prettier/prettier": [
       "warn",
@@ -27,16 +34,8 @@
       }
     ],
     "no-unused-vars": "warn",
-    "jsdoc/require-property-description": "off",
-    "jsdoc/require-param-description": "off",
-    "jsdoc/require-returns-description": "off",
-    "require-jsdoc": [
-      1,
-      {
-        "require": {
-          "MethodDefinition": true
-        }
-      }
-    ]
+    "no-sparse-arrays": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
   }
 }

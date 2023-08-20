@@ -1,0 +1,74 @@
+Design Document - Patrons
+
+-- What is a Patron?
+
+Patrons are the entities which show up outside of your tavern and interact with it.
+
+-- Types of Patron
+
+There are two types: 
+
+* Person
+  A person represents a patron that has come to the tavern for a drink.  They expect to be served a drink in a timely fasion and then to leave.
+
+* Mole
+  A mole represents an entity that wants to steal from the tavern.  Moles show up and try to take empty glasses from tables permantently.
+
+PERSON
+
+A person comes to the tavern for a drink.  The player is charged with serving them, and once the person is served they drink and then leave.  This is the basic "quest" of a person.  This mechanic has a PASS or FAIL outcome:
+  - PASS the patron gets what they want (a drink)
+    The player serves the patron a drink, it is imbibed, and they are happy.  This is a succsful question.
+  - FAIL the patron does not get what they want (a drink)
+    The patron is not served a drink in satisfactory time.  They get angry.
+
+TIME is important here.  There is a ticking clock that a person has before they get angry.  Each patron has the same clock when they sit down at the table.  After this clock is up, they get angry.
+
+In order to serve a person, the player must fill a mug with ale and give it to them.
+
+Required Items:
+  - Empty Mug/ Full Mug
+    The player can find empty mugs on top of patron tables or employee tables.  These can stack such that several mugs occupy the same table position.  To fill a mug the player must grab an empty one, then stand next to the keg and use it.  This makes the mug full.  The player can then place a full mug at any table.  If the table has a thirsty person, that person will grab the drink and imbibe it. 
+
+
+- Angry persons and Fire
+
+If a person does not get their drink in time they get angry.  When they are angry they set fire to the tavern.  First they set fire to their table.  If they still don't get a drink they set fire to other tables.  This continues until every table is on fire.
+
+An angry patron cannot be appeased.  They must be silenced, forcefully.  The player must acquire an item (the SWORD) and use it to remove them from the tavern.
+
+A table which is on fire cannot have drinks served on it.  It also has a chance to set an adjacent table on fire.  To remove the fire, the player must acquire an item (BUCKET OF WATER) and douse the fire.  This creates a wrecked table which must be repaired.  A wrecked table cannot have a drink served on it.  To repair the table, the player must acquire an item (HAMMER) and repair the table.  When repaired, the player can once again serve drinks on it.
+
+Required Items:
+ - Sword
+    The player can find a sword at a weapon rack.  The player cannot be holding any other item while they are holding a sword.  The sword must be placed back in the weapon rack: it cannot be used or put down anywhere else.  To attack a Patron, the Player only needs to make a move command into the patron once, and that patron is attacked, removing them.
+ - Bucket of Water
+    A bucket of water can be acquired by exiting the tavern and using to the well outside.  The player cannot be holding any other item when they are holding a bucket of water.  When used, the bucket of water douses any fires adjacent to the player, then is removed.  To get another bucket the Player must go outside and get another one
+ - Hammer
+    A hammer repairs broken tables.  A hammer must be acquired from a storage crate.   The hammer can be placed back in a storage crate or on an empty employee table.  A player must use the hammer on broken tables to repair them.
+
+When a person walks into the tavern, they look for a table to wait at.  They don't look at the state of the table.  They simply look for an empty space next to a table to stand at.  Even if the table is broken or on fire, they will go stand next to it and expect to be served a drink, kicking off their patience timer.
+
+MOLE
+
+A mole throws a wrench into the basic gameplay.  When a mole shows up, the player must prioritize removing it or else risk permanent damage to the tavern.
+
+Moles attempt to steal empty glasses.  They make their way into the tavern, find empty glasses and then attempt to leave the tavern with them.  The player must grab the sword and take care of them before these glasses are permanently lost (making it much more difficult to serve other patrons)
+
+-- Technical Requirements
+
+- Spawning. Patrons spawn outside the tavern.
+  - Where specifically do they spawn?
+    - Each patron is spawned outside the tavern on predefined tiles.  If a patron attempts to spawn on an occupied tile, that spawn is paused until the framestep where that spot is no longer occupied. 
+  - How often?
+    - Patrons are spawned at specified time intervals dependant on what level is being played.  This needs to be tuned to progressively get harder, but also should be based on a formula to save space.
+- Pathfinding. A patron must be able to dynamically find paths to destinations.
+  - A* pathfinding? Or is there a less efficient but smaller one? BFS?
+  - Two patrons cannot occupy the same position. How is this resolved when blocking a doorway?
+    - Patrons can only move through floors, grass, paths and open doors.
+    - Pathfinding is calculated and executed in a two step process for each entity.  If no path is found, the entity has a 10% chance of moving to a random accessable location (per framestep)
+    - Generate path maps that include each patron along with walls.  This must be done every framestep.  Very expensive but the scale of the map is small enough that this is okay.
+- Object Interation.  Patrons must be able to interact with objects.
+  - A Person can pick up a full mug and turn it into an empty mug
+  - A mole can pick up an empty mug and drop it in the ground when they are whacked with the sword
+  

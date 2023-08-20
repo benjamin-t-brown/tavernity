@@ -7,20 +7,28 @@
     "dist": "http-server --port=9843 dist",
     "build": "rm -rf dist *.zip && yarn tsc --project ./tsconfig.json && node scripts/build.js && yarn clean:js",
     "tsc": "tsc -p ./tsconfig.json",
+    "test": "vitest",
     "clean": "yarn clean:js && rm -rf dist *.zip",
     "clean:js": "rm -rf src/*.js src/*.js.map"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@types/node": "^18.16.1",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "@vitest/ui": "^0.19.1",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "happy-dom": "^10.10.0",
     "html-minifier": "^4.0.0",
     "http-server": "^14.1.1",
     "pngjs": "^7.0.0",
     "prettier": "^2.7.1",
     "terser": "^5.14.2",
     "typescript": "^4.7.4",
-    "vite": "^4.3.3"
+    "vite": "^4.3.3",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.29.3"
   }
 }
