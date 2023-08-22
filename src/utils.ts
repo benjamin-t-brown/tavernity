@@ -127,6 +127,27 @@ export const randInArr = (arr: any[]) => {
   return arr[Math.floor(rand() * arr.length)];
 };
 
+export const createAdjacentIterArray = (
+  [x, y]: Point,
+  includeDiags?: boolean
+): Point[] => {
+  return [
+    [x - 1, y],
+    [x + 1, y],
+    [x, y - 1],
+    [x, y + 1],
+  ]?.concat(
+    includeDiags
+      ? [
+          [x - 1, y - 1],
+          [x - 1, y + 1],
+          [x + 1, y - 1],
+          [x + 1, y + 1],
+        ]
+      : []
+  ) as Point[];
+};
+
 // export const pxPosToTilePos = (px: number, py: number): Point => {
 //   const tileWidth = 16;
 //   const tileHeight = 16;

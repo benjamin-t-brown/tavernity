@@ -8,7 +8,6 @@
     "lib": ["dom", "ES2017"],
     "removeComments": true,
     "sourceMap": false,
-    "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,
     "noImplicitAny": false,

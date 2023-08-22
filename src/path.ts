@@ -1,5 +1,5 @@
 import { Room } from './room';
-import { Point, at } from './utils';
+import { Point, at, createAdjacentIterArray } from './utils';
 import { isWallTile } from './db';
 import { Actor } from './actor';
 
@@ -56,8 +56,6 @@ export const findPath = (
 ): Point[] => {
   const path: Point[] = [];
 
-  // return [];
-
   const tilesToCheck: PfTile[] = [{ p: startLoc }];
   const tilesChecked: Point[] = [];
 
@@ -80,41 +78,9 @@ export const findPath = (
     }
 
     tilesChecked.push(pfTile.p);
-    const [x, y] = pfTile.p;
-
-    checkAddIf(
-      [x - 1, y],
-      pfTile,
-      pathArray,
-      width,
-      tilesChecked,
-      tilesToCheck
-    );
-    checkAddIf(
-      [x + 1, y],
-      pfTile,
-      pathArray,
-      width,
-      tilesChecked,
-      tilesToCheck
-    );
-    checkAddIf(
-      [x, y - 1],
-      pfTile,
-      pathArray,
-      width,
-      tilesChecked,
-      tilesToCheck
-    );
-    checkAddIf(
-      [x, y + 1],
-      pfTile,
-      pathArray,
-      width,
-      tilesChecked,
-      tilesToCheck
-    );
-    // }
+    for (const p of createAdjacentIterArray(pfTile.p)) {
+      checkAddIf(p, pfTile, pathArray, width, tilesChecked, tilesToCheck);
+    }
   }
 
   return path;

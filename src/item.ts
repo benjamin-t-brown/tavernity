@@ -3,6 +3,7 @@ import { drawSprite } from './draw';
 
 export interface Item extends Actor {
   name: ItemName;
+  drawAt: (x: number, y: number, flipped?: boolean) => void;
 }
 
 export type ItemName =
@@ -13,10 +14,10 @@ export type ItemName =
   | 'hammer'
   | 'bucketFull';
 
-export const itemNameToLabelObj = (itemName: ItemName): string => {
+export const itemNameToLabel = (itemName: ItemName): string => {
   const labels: Record<ItemName, string> = {
-    mugEmpty: 'Mug',
-    mugFull: 'Mug',
+    mugEmpty: 'Empty Mug',
+    mugFull: 'Full Mug',
     sword: 'Sword',
     buoy: 'Buoy',
     hammer: 'Hammer',
@@ -30,9 +31,9 @@ export const itemNameToSprite = (itemName: ItemName) => {
     (() => {
       switch (itemName) {
         case 'mugEmpty':
-          return 's_29';
-        case 'mugFull':
           return 's_30';
+        case 'mugFull':
+          return 's_29';
         case 'sword':
           return 's_31';
         case 'buoy':
@@ -45,7 +46,6 @@ export const itemNameToSprite = (itemName: ItemName) => {
 };
 
 export const createItem = (itemName: ItemName, x: number, y: number) => {
-  const sprite = itemNameToSprite(itemName);
   const actor = createActor();
   const cl: Item = {
     ...actor,
@@ -53,7 +53,12 @@ export const createItem = (itemName: ItemName, x: number, y: number) => {
     x,
     y,
     draw() {
-      drawSprite(sprite, cl.x, cl.y, cl.scale);
+      const sprite = itemNameToSprite(cl.name);
+      drawSprite(sprite, cl.x * 16, cl.y * 16);
+    },
+    drawAt(x, y, flipped?: boolean) {
+      const sprite = itemNameToSprite(cl.name);
+      drawSprite(sprite + (flipped ? '_f' : ''), x, y);
     },
   };
 

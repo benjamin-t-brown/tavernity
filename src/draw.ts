@@ -28,16 +28,16 @@ export const clearScreen = () => {
   drawRect(0, 0, canvas.width, canvas.height, 'grey');
 };
 
-export const setupDrawing = () => {
-  const ctx = getCtx();
-  ctx.save();
-  ctx.translate(0, 0);
-  ctx.scale(globalScale, globalScale);
-};
+// export const setupDrawing = () => {
+//   const ctx = getCtx();
+//   ctx.save();
+//   ctx.translate(0, 0);
+//   ctx.scale(globalScale, globalScale);
+// };
 
-export const finishDrawing = () => {
-  getCtx().restore();
-};
+// export const finishDrawing = () => {
+//   getCtx().restore();
+// };
 
 export const setOpacity = (opacity: number, ctx?: CanvasRenderingContext2D) => {
   ctx = ctx || getCtx();
@@ -234,7 +234,8 @@ export const getCanvas = (): HTMLCanvasElement => {
   if (model_canvas) {
     return model_canvas as HTMLCanvasElement;
   } else {
-    const [canvas, ctx] = createCanvas(128 * globalScale, 128 * globalScale);
+    // const [canvas, ctx] = createCanvas(512, 512);
+    const [canvas, ctx] = createCanvas(576, 576);
     canvas.id = 'canv';
     ctx.lineWidth = 2;
     // canvas.style.transform = 'scale(4)';

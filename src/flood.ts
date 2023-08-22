@@ -1,5 +1,5 @@
-import { isFloorTile } from './db';
-import { Point, at } from './utils';
+import { isFloorTile, isVisibleTile } from './db';
+import { Point, at, createAdjacentIterArray } from './utils';
 
 type FloodMap = [number[], number[], number];
 
@@ -30,10 +30,9 @@ const floodFillRecursive = (
   const [, indexMap, width] = floodMap;
   if (isSpaceEmpty(node, floodMap)) {
     indexMap[x + y * width] = indexToFillWith;
-    floodFillRecursive([x - 1, y], floodMap, indexToFillWith);
-    floodFillRecursive([x + 1, y], floodMap, indexToFillWith);
-    floodFillRecursive([x, y - 1], floodMap, indexToFillWith);
-    floodFillRecursive([x, y + 1], floodMap, indexToFillWith);
+    createAdjacentIterArray([x, y]).forEach((p) => {
+      floodFillRecursive(p, floodMap, indexToFillWith);
+    });
   }
 };
 
@@ -59,33 +58,40 @@ const markRoomTiles = (indexToFillWith: number, floodMap: FloodMap) => {
 
 const createRoomMap = (
   indexMap: number[],
+  tilesMap: number[],
   tilesWidth: number,
   markNumber: number
 ) => {
   const roomMap = createEmptyMap(tilesWidth, 0);
 
-  const checkAt = (p: Point, markNumber: number, tilesToMark: Point[]) => {
+  const checkAt = (
+    p: Point,
+    markNumber: number,
+    tilesToMark: Point[],
+    recurse = true
+  ) => {
     if (at(p, indexMap, tilesWidth) === -1) {
       tilesToMark.push([p[0] + p[1] * tilesWidth, markNumber]);
+
+      // allows player to see walls behind things that are marked as walls but should
+      // be possible to see over: crates/tables/weapons/kegs
+      if (recurse && isVisibleTile(tilesMap[p[0] + p[1] * tilesWidth])) {
+        createAdjacentIterArray(p, true).forEach((p) => {
+          checkAt(p, markNumber, tilesToMark, false);
+        });
+      }
     }
   };
 
-  // for (let markNumber = 1; markNumber <= maxRooms; markNumber++) {
   const tilesToMark: Point[] = [];
   for (let y = 0; y < tilesWidth; y++) {
     for (let x = 0; x < tilesWidth; x++) {
       const ind = y * tilesWidth + x;
       if (indexMap[ind] === markNumber) {
         roomMap[ind] = markNumber;
-        // check adjacencies, then set tiles to mark
-        checkAt([x - 1, y], markNumber, tilesToMark);
-        checkAt([x + 1, y], markNumber, tilesToMark);
-        checkAt([x, y - 1], markNumber, tilesToMark);
-        checkAt([x, y + 1], markNumber, tilesToMark);
-        checkAt([x - 1, y - 1], markNumber, tilesToMark);
-        checkAt([x - 1, y + 1], markNumber, tilesToMark);
-        checkAt([x + 1, y - 1], markNumber, tilesToMark);
-        checkAt([x + 1, y + 1], markNumber, tilesToMark);
+        createAdjacentIterArray([x, y], true).forEach((p) => {
+          checkAt(p, markNumber, tilesToMark);
+        });
       }
     }
   }
@@ -112,7 +118,7 @@ export const createVisibilityMaps = (
   const rooms: number[][] = [];
 
   for (let i = 1; i < ctr; i++) {
-    rooms.push(createRoomMap(indexMap, tilesWidth, i));
+    rooms.push(createRoomMap(indexMap, tiles, tilesWidth, i));
   }
 
   return rooms;

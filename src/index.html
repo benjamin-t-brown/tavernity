@@ -11,14 +11,14 @@
       canvas {
         border: 1px solid white;
       }
-      #canvasDiv {
+      .canvas-div {
         display: flex;
         justify-content: center;
         flex-direction: column;
         align-items: center;
         height: 100%;
       }
-      #canvasDiv>div {
+      .canvas-div>div {
         color: white;
         display: flex;
         align-items: center;
@@ -30,6 +30,23 @@
         padding: 25px;
         font-size: 24px;
         transform: translateY(-100%);
+      }
+      #key-info {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        font-size: 20px;
+        color: white;
+      }
+      #key-info >span{
+        padding: 4px;
+        transform: translateY(-96px);
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .key-info-warn {
+        transform: translateY(-164px) !important;
+        color: #F55;
       }
       @keyframes fl {
         from {color: black}
@@ -43,11 +60,12 @@
         margin: 8px;
         font-size: 14px;
       }
+      
     </style>
-    <div id="canvasDiv">
+    <div id="canvasDiv" class="canvas-div">
       <!-- <div>Scale: <input id="volume" type="range" min="0" max="100" value="100" onchange="vol(this)"></input></div> -->
       <div>Volume: <input id="volume" type="range" min="0" max="100" value="100" onchange="vol(this)"></input></div>
-      <div id="modal"></div>
+      <!-- <div id="modal"></div> -->
       <div>Arrows (move) Space (interact)</div>
       <div>+/- (zoom)</div>
       <!-- <div class="modal-p">
@@ -55,6 +73,10 @@
 
         </div>
       </div> -->
+    </div>
+    <div id="key-info" class="canvas-div">
+      <span>a</span> <!--Key Item Text -->
+      <span class="key-info-warn">a</span> <!--Warning Text -->
     </div>
     <script src="index.ts" type="module"></script>
   </body>

@@ -1,12 +1,5 @@
 import { initDb } from './db';
-import {
-  clearScreen,
-  finishDrawing,
-  getCanvas,
-  loadImagesAndSprites,
-  setFm,
-  setupDrawing,
-} from './draw';
+import { clearScreen, getCanvas, loadImagesAndSprites, setFm } from './draw';
 import { Game, createGame } from './game';
 import { normalize } from './utils';
 import { setVolume } from './zzfx';
