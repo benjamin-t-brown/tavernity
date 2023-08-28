@@ -24,10 +24,7 @@ export const createActor = (): Actor => {
     getPos: (): Point => {
       return [cl.x, cl.y];
     },
-    update: () => {
-      cl.x += cl.vx;
-      cl.y += cl.vy;
-    },
+    update: () => void 0,
     draw: () => void 0,
   };
   return cl;

@@ -2,26 +2,35 @@ import { createCanvas, drawRect, drawSprite } from './draw';
 import { createPatron } from './patron';
 import { getGame } from './game';
 import { createItem } from './item';
-import { at, getModalText } from './utils';
+import { Point, Timer, at, getModalText, printArr } from './utils';
 import { rand } from './zzfx';
 import { createVisibilityMaps } from './flood';
 import { Actor, createActor } from './actor';
+import { ON_FIRE, roomNumberToLevel } from './db';
 
 export interface Room extends Actor {
   w: number;
   h: number;
   tiles: Tile[];
   visMaps: number[][];
-  visMapInds: number[];
-  getTileAt: (x: number, y: number) => Tile;
+  spawns: Point[];
+  getTileAt: (x: number, y: number, orig?: boolean) => Tile;
   setTileAt: (x: number, y: number, tileId: number) => void;
+  getTileLevel: (t: Tile) => number;
   isTileVisible(x: number, y: number, visMapInds?: number[]): boolean;
   reset: () => void;
 }
 
 export type Tile = [number /*id*/, number /*tileX*/, number /*tileY*/];
 
-export const createRoom = (tiles: number[], roomWidth: number): Room => {
+export const createRoom = (
+  tiles: number[],
+  roomWidth: number,
+  spawns: Point[] = []
+): Room => {
+  const fireTimer = new Timer(100);
+  let fireSpriteOffset = false;
+
   const calculateVisMapInds = () => {
     const game = getGame();
     const player = game.getPlayer();
@@ -40,19 +49,24 @@ export const createRoom = (tiles: number[], roomWidth: number): Room => {
     return visMapInds;
   };
 
+  let visMapInds: number[] = [];
+
+  const originalTiles: Tile[] = tiles.map((tileId, i) => [
+    tileId,
+    i % roomWidth,
+    Math.floor(i / roomWidth),
+  ]);
+
   const cl: Room = {
     ...createActor(),
     w: roomWidth,
     h: roomWidth,
+    spawns,
     visMaps: createVisibilityMaps(tiles, roomWidth),
-    visMapInds: [],
-    tiles: tiles.map((tileId, i) => [
-      tileId,
-      i % roomWidth,
-      Math.floor(i / roomWidth),
-    ]),
-    getTileAt: (tx: number, ty: number) => {
-      const tile = cl.tiles[ty * roomWidth + tx];
+    tiles: structuredClone(originalTiles),
+    getTileAt: (tx: number, ty: number, orig?: boolean) => {
+      const tiles = orig ? originalTiles : cl.tiles;
+      const tile = tiles[ty * roomWidth + tx];
       return tile ?? [0];
     },
     setTileAt: (tx: number, ty: number, tileId: number) => {
@@ -61,8 +75,21 @@ export const createRoom = (tiles: number[], roomWidth: number): Room => {
         t[0] = tileId;
       }
     },
+    getTileLevel: (t: Tile) => {
+      const [tileId, tx, ty] = t;
+      if (tileId === 0) {
+        return 0;
+      }
+      for (const visMap of cl.visMaps) {
+        const roomNumber = visMap[ty * roomWidth + tx];
+        if (roomNumber) {
+          return roomNumberToLevel(roomNumber);
+        }
+      }
+      return 0;
+    },
     isTileVisible: (tx: number, ty: number) => {
-      const isVisible = cl.visMapInds.reduce(
+      const isVisible = visMapInds.reduce(
         (prev, curr) => prev || at([tx, ty], cl.visMaps[curr], roomWidth) > 0,
         false
       );
@@ -70,14 +97,22 @@ export const createRoom = (tiles: number[], roomWidth: number): Room => {
     },
     reset: () => {},
     update: () => {
-      cl.visMapInds = calculateVisMapInds();
+      visMapInds = calculateVisMapInds();
+
+      if (fireTimer.isDone()) {
+        fireTimer.start();
+        fireSpriteOffset = !fireSpriteOffset;
+      }
     },
     draw: () => {
       for (let i = 0; i < roomWidth; i++) {
         for (let j = 0; j < roomWidth; j++) {
-          const [tileId] = cl.tiles[j + i * roomWidth];
-          const isVisible = cl.isTileVisible(j, i, cl.visMapInds);
+          let [tileId] = cl.tiles[j + i * roomWidth];
+          const isVisible = cl.isTileVisible(j, i, visMapInds);
           if (tileId && isVisible) {
+            if (tileId === ON_FIRE) {
+              tileId += fireSpriteOffset ? 1 : 0;
+            }
             drawSprite('s_' + (tileId - 1), j * 16, i * 16);
           } else {
             drawRect(j * 16, i * 16, 16, 16, '#000');
@@ -90,6 +125,10 @@ export const createRoom = (tiles: number[], roomWidth: number): Room => {
   const findTile = (arr: Tile[], searchTileId: number) => {
     return arr.find(([tileId]) => tileId === searchTileId) as Tile;
   };
+
+  // for (const visMap of cl.visMaps) {
+  //   printArr(visMap, roomWidth);
+  // }
 
   return cl;
 };

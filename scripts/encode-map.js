@@ -21,7 +21,7 @@ const main = () => {
   const tiles = tiledMap.layers[0].data;
   const spawns = tiledMap.layers[1].objects.map((obj) => {
     return [
-      Math.floor(obj.x / 16) - 1,
+      Math.floor(obj.x / 16),
       Math.floor(obj.y / 16) - 1,
     ];
   });

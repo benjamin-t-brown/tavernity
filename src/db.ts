@@ -16,12 +16,16 @@ export const initDbAnims = () => {
   type IntermediateType = [string, string[]];
   const lrAnims: IntermediateType[] = [
     ['mole', ['s_9', 's_10']],
-    ['pl_0', ['s_0']],
-    ['pl_1', ['s_1']],
-    ['pl_2', ['s_2']],
+    // ['pl_0', ['s_0']],
+    // ['pl_1', ['s_1']],
+    // ['pl_2', ['s_2']],
     ['p_walk', ['s_3']],
     ['p_wait', ['s_3', 's_4']],
     ['p_angry', ['s_7', 's_8']],
+    ['part_+1', ['s_39']],
+    ['water', ['s_40']],
+    ['bloodf', ['s_36']],
+    ['blood', ['s_35']],
   ];
 
   for (const [name, sprites] of lrAnims) {
@@ -49,19 +53,44 @@ export const initDbSounds = () => {
   dbSounds.fill = [1.09,,0,.19,,.02,,2.31,92,-25,927,,,,-1.4,.9,,.5,.09];
   // prettier-ignore
   dbSounds.moleDead = [2.1,,1360,.06,.09,.2,2,1.63,,,,,,.9,-0.4,.1,.03,.57,,.01];
+  // prettier-ignore
+  dbSounds.moleAlert = [,,169,,.13,,2,2.18,.1,-7,,,.11,.6,,,,,.18,.05];
+  // prettier-ignore
+  dbSounds.plusOne = [1.12,,73,.02,.18,.06,2,.87,,,-190,.11,,,,,,.82,.01,.29];
+  // prettier-ignore
+  dbSounds.drawSword = [,,455,,.09,.01,2,2.31,,,-758,.01,.02,,,,,,.2,.59]
+  // dbSounds.drawSword = [,,1149,,,.01,4,.15,19,.4,,,,.5,,,,,.1];
+  // prettier-ignore
+  dbSounds.swingSword = [,,232,.07,.02,0,4,.27,29,75,,,,.1,,,,,,.02];
+  // prettier-ignore
+  dbSounds.patronAngry = [1.29,,322,.03,.17,0,,.55,,-89,-843,.15,.09,.3,-234,,.02,,.09];
+  // prettier-ignore
+  dbSounds.dumpBucket = [1.99,,246,,.07,.03,4,.66,47,32,,,,,-0.4,,.25,,.13,.83];
+  // prettier-ignore
+  dbSounds.hitSomething = [1.04,,772,,.07,.06,2,.31,90,-15,590,.02,,,,.3,,.47,.03];
+  // prettier-ignore
+  dbSounds.personHit = [,,495,.05,.19,0,3,.15,.1,,,,,,.4,,,,.03,.02];
+  // dbSounds.moleSpawn = [2.09,,326,.08,,0,4,.02,,4,,,.11,,28,,.1,.01,.22,.67];
+  // prettier-ignore
+  dbSounds.repair = [1.04,,610,.04,.18,.04,,.79,33,,,,,.2,85,.1,,.27];
+  // prettier-ignore
+  dbSounds.fire = [1.06,,1028,.11,.14,.03,4,.15,-4.8,,-690,.18,,.1,,.4,.07,.99,.15];
+  // prettier-ignore
+  dbSounds.destroyCrate = [,,80,.04,.03,.2,4,.34,-0.3,,,,,,-9.9,,,,.18];
 
   // dbSounds.moleSpawn = [2.09,,326,.08,,0,4,.02,,4,,,.11,,28,,.1,.01,.22,.67];
 };
 
-export const createAnimationFromDb = (animName: string) => {
+export const createAnimationFromDb = (animName: string): Animation => {
   const animStr = dbAnims[animName];
   if (!animStr) {
     throw new Error('No anim: ' + animName);
   }
-  const [loop, msStr, ...sprites] = animStr.split(' ');
+  const [, msStr, ...sprites] = animStr.split(' ');
   const ms = parseInt(msStr);
-  return createAnimation([
-    loop === 't',
+  const anim = createAnimation([
+    // loop === 't',
+    true,
     animName,
     sprites.map((s) => {
       return {
@@ -70,6 +99,7 @@ export const createAnimationFromDb = (animName: string) => {
       };
     }),
   ]);
+  return anim;
 };
 
 export const getSound = (soundName: string) => {
@@ -80,9 +110,27 @@ export const getSound = (soundName: string) => {
   return s;
 };
 
-export const FLOOR_TILES = [12, 14, 27, 28, 29];
+export const FLOOR_TILES = [12, 14, 27, 28, 29, 39];
 export const TABLE_TILES = [19, 20, 21, 22];
 export const KEG_TILES = [18];
+export const TABLE_VERTICAL = 20;
+export const TABLE_HORIZONTAL = 19;
+export const TABLE_EMPLOYEE_VERTICAL = 22;
+export const TABLE_EMPLOYEE_HORIZONTAL = 21;
+export const WEAPON_RACK = 13;
+export const CLOSED_DOOR = 26;
+export const OUTSIDE_WELL = 24;
+export const RUBBLE = 14;
+export const ON_FIRE = 15;
+export const CRATE = 17;
+
+const roomOrder = [3, 4, 6, 5, 2, 1];
+export const levelToRoomNumber = (level: number) => {
+  return roomOrder[level + 1] || 3;
+};
+export const roomNumberToLevel = (roomNumber: number) => {
+  return roomOrder.indexOf(roomNumber) + 1;
+};
 
 export const isFloorTile = (tileId: number) => {
   return FLOOR_TILES.includes(tileId);
@@ -96,6 +144,10 @@ export const isWallTile = (tileId: number) => {
   return !isFloorTile(tileId);
 };
 
+export const isWallTileNotIncludingDoors = (tileId: number) => {
+  return !isFloorTile(tileId) && !isClosedDoorTile(tileId);
+};
+
 export const isClosedDoorTile = (tileId: number) => {
-  return tileId === 26;
+  return tileId === CLOSED_DOOR;
 };

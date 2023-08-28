@@ -1,12 +1,14 @@
 import { Room } from './room';
-import { Point, at, createAdjacentIterArray } from './utils';
-import { isWallTile } from './db';
+import { Point, at, createAdjacentIterArray, pointsEq } from './utils';
+import { isWallTile, isWallTileNotIncludingDoors } from './db';
 import { Actor } from './actor';
 
 interface PfTile {
   parent?: PfTile;
   p: Point;
 }
+
+const pointToKey = ([x, y]: Point) => `${x},${y}`;
 
 export const createPathArray = (room: Room, actors: Actor[]) => {
   const arr: number[] = [];
@@ -16,7 +18,7 @@ export const createPathArray = (room: Room, actors: Actor[]) => {
   };
 
   for (const [id, x, y] of room.tiles) {
-    if (isWallTile(id) || findActorAt([x, y])) {
+    if (isWallTileNotIncludingDoors(id) || findActorAt([x, y])) {
       arr.push(0);
     } else {
       arr.push(1);
@@ -26,25 +28,21 @@ export const createPathArray = (room: Room, actors: Actor[]) => {
   return arr;
 };
 
-const pointsEq = (p1: Point, p2: Point) => {
-  // return '' + p1 === '' + p2;
-  return p1[0] === p2[0] && p1[1] === p2[1];
-};
-
 const checkAddIf = (
   p: Point,
   parent: PfTile,
   pathArray: number[],
   width: number,
-  tilesChecked: Point[],
+  tilesChecked: Record<string, boolean>,
   tilesToCheck: PfTile[]
 ) => {
   const isTraversable = at(p, pathArray, width) === 1;
-  if (isTraversable && !tilesChecked.find((t) => pointsEq(t, p))) {
+  if (isTraversable && !tilesChecked[pointToKey(p)]) {
     tilesToCheck.push({
       p,
       parent,
     });
+    tilesChecked[pointToKey(p)] = true;
   }
 };
 
@@ -57,7 +55,11 @@ export const findPath = (
   const path: Point[] = [];
 
   const tilesToCheck: PfTile[] = [{ p: startLoc }];
-  const tilesChecked: Point[] = [];
+  const tilesChecked: Record<string, boolean> = {
+    [pointToKey(startLoc)]: true,
+  };
+
+  let ctr = 1000;
 
   while (tilesToCheck.length) {
     const pfTile = tilesToCheck.shift();
@@ -77,9 +79,12 @@ export const findPath = (
       break;
     }
 
-    tilesChecked.push(pfTile.p);
     for (const p of createAdjacentIterArray(pfTile.p)) {
       checkAddIf(p, pfTile, pathArray, width, tilesChecked, tilesToCheck);
+    }
+    ctr--;
+    if (ctr <= 0) {
+      break;
     }
   }
 

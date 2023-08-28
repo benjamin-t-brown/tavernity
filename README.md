@@ -24,8 +24,4 @@ Build Submission Zip File:
 
 `yarn build` -->
 
-requires "convert" from imagemagick
-
-sudo apt install imagemagick-6.q16
-
 requires "advzip" and "advping" from advancemame

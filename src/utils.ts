@@ -37,6 +37,11 @@ export const at = ([x, y]: Point, arr: number[], width: number) => {
   return arr[x + y * width];
 };
 
+export const pointsEq = (p1: Point, p2: Point) => {
+  // return '' + p1 === '' + p2;
+  return p1?.[0] === p2?.[0] && p1?.[1] === p2?.[1];
+};
+
 export const timeoutPromise = async (ms: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -146,6 +151,23 @@ export const createAdjacentIterArray = (
         ]
       : []
   ) as Point[];
+};
+
+export const printArr = (arr: number[], w: number) => {
+  let str = '';
+  for (let i = 0; i < w; i++) {
+    for (let j = 0; j < w; j++) {
+      const v = arr[j + i * w];
+      str += ' ';
+      if (v >= 0) {
+        str += ' ';
+      }
+      str += v + ',';
+    }
+    str += '\n';
+  }
+
+  console.log(str);
 };
 
 // export const pxPosToTilePos = (px: number, py: number): Point => {

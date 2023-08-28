@@ -6,15 +6,18 @@ import {
   Direction,
   Point,
   Timer,
+  createAdjacentIterArray,
   dirToOffsets,
   getModalText,
   isKeyDown,
   timeoutPromise,
 } from './utils';
 import { playSound } from './utils';
-import { Item, ItemName } from './item';
+import { Item, ItemName, createItem } from './item';
 import {
   KEG_TILES,
+  ON_FIRE,
+  RUBBLE,
   TABLE_TILES,
   createAnimationFromDb,
   isClosedDoorTile,
@@ -22,43 +25,63 @@ import {
 } from './db';
 import { Actor, createActor } from './actor';
 import { Tile } from './room';
+import {
+  ACTION_DUMP_BUCKET,
+  ACTION_FILL_LEFT,
+  ACTION_FILL_RIGHT,
+  ACTION_PICKUP_BUCKET,
+  ACTION_PICKUP_LEFT,
+  ACTION_PICKUP_RIGHT,
+  ACTION_PICKUP_WEAPON,
+  ACTION_PUTDOWN_LEFT,
+  ACTION_PUTDOWN_RIGHT,
+  ACTION_PUTDOWN_WEAPON,
+  ACTION_REPAIR,
+  ACTION_SWING_WEAPON,
+  getAvailableAction,
+} from './action';
+
+export const handleWallsAndDoors = (
+  cl: Actor,
+  [prevX, prevY]: Point,
+  onDoorCb: (tileId: number) => void
+) => {
+  const game = getGame();
+  const prevTileId = game.room.getTileAt(prevX, prevY)?.[0];
+  const tileId = game.room.getTileAt(cl.x, cl.y)?.[0];
+  const patronAt = game.getPatronAt(cl.x, cl.y);
+  if (isWallTile(tileId) || (patronAt && patronAt !== cl)) {
+    if (isClosedDoorTile(tileId)) {
+      onDoorCb(tileId);
+    }
+    cl.x = prevX;
+    cl.y = prevY;
+  } else {
+    if (isClosedDoorTile(prevTileId - 1)) {
+      playSound('doorClose');
+      if (!game.getPatronAt(prevX, prevY)) {
+        game.room.setTileAt(prevX, prevY, prevTileId - 1);
+      }
+    }
+  }
+};
 
 export interface Player extends Actor {
   dir: Direction;
   ctrlEnabled: boolean;
   itemLeft: Item | undefined;
   itemRight: Item | undefined;
+  reset: () => void;
 }
 export const createPlayer = () => {
   const keyPressTimer1 = new Timer(300);
   const keyPressTimer2 = new Timer(80);
+  const weaponTimer = new Timer(150);
   let firstKeyPressed = false;
-
-  const handleWallsAndDoors = ([prevX, prevY]: Point) => {
-    const game = getGame();
-    const prevTileId = game.room.getTileAt(prevX, prevY)?.[0];
-    const tileId = game.room.getTileAt(cl.x, cl.y)?.[0];
-    if (isWallTile(tileId)) {
-      if (isClosedDoorTile(tileId)) {
-        playSound('doorOpen');
-        game.room.setTileAt(cl.x, cl.y, tileId + 1);
-        keyPressTimer1.start();
-        firstKeyPressed = true;
-      }
-      cl.x = prevX;
-      cl.y = prevY;
-    } else {
-      if (isClosedDoorTile(prevTileId - 1)) {
-        playSound('doorClose');
-        game.room.setTileAt(prevX, prevY, prevTileId - 1);
-      }
-    }
-  };
 
   const handlePickupItem = (item: Item) => {
     item.remv = true;
     if (cl.itemLeft === undefined) {
-      console.log('put item in left');
       playSound('item');
       cl.itemLeft = item;
     } else if (cl.itemRight === undefined) {
@@ -67,6 +90,14 @@ export const createPlayer = () => {
     } else {
       getGame().showWarning('Your hands are full!');
     }
+  };
+
+  const handlePickupItemBothHands = (itemName: ItemName) => {
+    const item = createItem(itemName, cl.x, cl.y);
+    item.remv = true;
+    playSound('drawSword');
+    cl.itemLeft = item;
+    cl.itemRight = item;
   };
 
   const handlePutDownItemOnTable = (hand: 'Right' | 'Left', tile: Tile) => {
@@ -84,6 +115,62 @@ export const createPlayer = () => {
   const handleFillMug = (mugItem: Item) => {
     playSound('fill');
     mugItem.name = 'mugFull';
+  };
+
+  const handleSwingWeapon = () => {
+    const game = getGame();
+    if (weaponTimer.isDone()) {
+      weaponTimer.start();
+      playSound('swingSword');
+      for (const [x, y] of createAdjacentIterArray([cl.x, cl.y])) {
+        const patron = game.getPatronAt(x, y);
+        if (patron?.getState() === 'rioting' || patron?.type === 'mole') {
+          const tileBeneath = game.room.getTileAt(x, y);
+          if (tileBeneath[0] !== RUBBLE) {
+            game.fParticles.push(createParticle('bloodf_l', Infinity, x, y));
+          }
+          game.particles.push(createParticle('blood_l', 300, x, y));
+          patron.remv = true;
+          playSound('hitSomething');
+          setTimeout(() => {
+            if (patron?.type === 'mole') {
+              playSound('moleDead');
+            } else {
+              playSound('personHit');
+            }
+          }, 300);
+          break;
+        }
+      }
+    }
+  };
+
+  const handlePutdownWeapon = () => {
+    cl.itemLeft = cl.itemRight = undefined;
+    playSound('itemPlace');
+  };
+
+  const handleDumpBucket = () => {
+    cl.itemLeft = undefined;
+    cl.itemRight = undefined;
+    playSound('dumpBucket');
+    const game = getGame();
+    for (const [x, y] of createAdjacentIterArray([cl.x, cl.y], true)) {
+      const [id] = game.room.getTileAt(x, y);
+      if (id === ON_FIRE) {
+        game.room.setTileAt(x, y, RUBBLE);
+      }
+      game.particles.push(createParticle('water_l', 300, x, y));
+    }
+  };
+
+  const handleRepair = (tile: Tile) => {
+    const game = getGame();
+    const [, x, y] = tile;
+    const origTile = game.room.getTileAt(x, y, true);
+    const [origId] = origTile;
+    tile[0] = origId;
+    playSound('repair');
   };
 
   const handleKeyUpdate = () => {
@@ -108,8 +195,13 @@ export const createPlayer = () => {
         }
 
         if (moved) {
-          handleWallsAndDoors([x, y]);
-          // playSound('step');
+          handleWallsAndDoors(cl, [x, y], (tileId) => {
+            const game = getGame();
+            playSound('doorOpen');
+            game.room.setTileAt(cl.x, cl.y, tileId + 1);
+            keyPressTimer1.start();
+            firstKeyPressed = true;
+          });
         }
 
         if (cl.x !== x || cl.y !== y) {
@@ -128,36 +220,52 @@ export const createPlayer = () => {
   window.addEventListener('keydown', (e) => {
     const game = getGame();
     if (e.key === ' ') {
-      const adjItemResult = game.getAdjItem([cl.x, cl.y]);
-
-      let localAdjTile: Tile | undefined;
-
-      if (adjItemResult && (!cl.itemLeft || !cl.itemRight)) {
-        console.log('pickup item');
-        handlePickupItem(adjItemResult[0]);
-      } else if (
-        cl.itemLeft?.name === 'mugEmpty' &&
-        game.getAdjTile([cl.x, cl.y], KEG_TILES)
-      ) {
-        handleFillMug(cl.itemLeft);
-      } else if (
-        cl.itemRight?.name === 'mugEmpty' &&
-        game.getAdjTile([cl.x, cl.y], KEG_TILES)
-      ) {
-        handleFillMug(cl.itemRight);
-      } else if (
-        cl.itemRight &&
-        (localAdjTile = game.getAdjTile([cl.x, cl.y], TABLE_TILES)) &&
-        !game.getItemAt(localAdjTile[1], localAdjTile[2])
-      ) {
-        handlePutDownItemOnTable('Right', localAdjTile);
-      } else if (
-        cl.itemLeft &&
-        (localAdjTile = game.getAdjTile([cl.x, cl.y], TABLE_TILES)) &&
-        !game.getItemAt(localAdjTile[1], localAdjTile[2])
-      ) {
-        handlePutDownItemOnTable('Left', localAdjTile);
+      const action = getAvailableAction(game);
+      if (!action) {
+        return;
       }
+
+      const { type, tile, item } = action;
+
+      const actions = {
+        [ACTION_PICKUP_LEFT]: () => {
+          handlePickupItem(item as Item);
+        },
+        [ACTION_PICKUP_RIGHT]: () => {
+          handlePickupItem(item as Item);
+        },
+        [ACTION_PICKUP_WEAPON]: () => {
+          handlePickupItemBothHands('sword');
+        },
+        [ACTION_PICKUP_BUCKET]: () => {
+          handlePickupItemBothHands('bucketFull');
+        },
+        [ACTION_PUTDOWN_LEFT]: () => {
+          handlePutDownItemOnTable('Left', tile as Tile);
+        },
+        [ACTION_PUTDOWN_RIGHT]: () => {
+          handlePutDownItemOnTable('Right', tile as Tile);
+        },
+        [ACTION_FILL_LEFT]: () => {
+          handleFillMug(cl.itemLeft as Item);
+        },
+        [ACTION_FILL_RIGHT]: () => {
+          handleFillMug(cl.itemRight as Item);
+        },
+        [ACTION_SWING_WEAPON]: () => {
+          handleSwingWeapon();
+        },
+        [ACTION_PUTDOWN_WEAPON]: () => {
+          handlePutdownWeapon();
+        },
+        [ACTION_DUMP_BUCKET]: () => {
+          handleDumpBucket();
+        },
+        [ACTION_REPAIR]: () => {
+          handleRepair(tile as Tile);
+        },
+      };
+      actions[type]();
     }
   });
 
@@ -168,11 +276,15 @@ export const createPlayer = () => {
 
   const cl: Player = Object.assign(createActor(), {
     dir: 'l' as Direction,
-    x: 10,
+    x: 18,
     y: 8,
     itemLeft: undefined,
     itemRight: undefined,
     ctrlEnabled: true,
+    reset() {
+      cl.itemLeft = undefined;
+      cl.itemRight = undefined;
+    },
     update() {
       handleKeyUpdate();
     },
@@ -184,13 +296,29 @@ export const createPlayer = () => {
       if (cl.itemRight) {
         sprOffset++;
       }
+      const isItemInBothHands =
+        cl.itemLeft !== undefined && cl.itemLeft === cl.itemRight;
+      if (isItemInBothHands) {
+        sprOffset--;
+        if (!weaponTimer.isDone()) {
+          sprOffset--;
+        }
+      }
 
       drawSprite('s_' + sprOffset, cl.x * 16, cl.y * 16);
-      if (cl.itemLeft) {
-        cl.itemLeft.drawAt(cl.x * 16 - 8, cl.y * 16 - 6, true);
-      }
-      if (cl.itemRight) {
-        cl.itemRight.drawAt(cl.x * 16 + 8, cl.y * 16 - 6);
+      if (isItemInBothHands) {
+        let yOffset = -4;
+        if (!weaponTimer.isDone()) {
+          yOffset = 2;
+        }
+        (cl.itemLeft as Item).drawAt(cl.x * 16 - 6, cl.y * 16 + yOffset, true);
+      } else {
+        if (cl.itemLeft) {
+          cl.itemLeft.drawAt(cl.x * 16 - 8, cl.y * 16 - 6, true);
+        }
+        if (cl.itemRight) {
+          cl.itemRight.drawAt(cl.x * 16 + 8, cl.y * 16 - 6);
+        }
       }
     },
   });

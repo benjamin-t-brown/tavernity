@@ -30,7 +30,7 @@ export const createParticle = (
     },
     draw() {
       anim.update();
-      drawSprite(anim.getSprite(), cl.x, cl.y, cl.scale);
+      drawSprite(anim.getSprite(), cl.x * 16, cl.y * 16);
     },
   };
 

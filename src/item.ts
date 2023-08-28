@@ -39,7 +39,7 @@ export const itemNameToSprite = (itemName: ItemName) => {
         case 'buoy':
           return 's_32';
         case 'bucketFull':
-          return 's_33';
+          return 's_34';
       }
     })() ?? 's_0'
   );
@@ -53,6 +53,9 @@ export const createItem = (itemName: ItemName, x: number, y: number) => {
     x,
     y,
     draw() {
+      if (cl.remv) {
+        return;
+      }
       const sprite = itemNameToSprite(cl.name);
       drawSprite(sprite, cl.x * 16, cl.y * 16);
     },

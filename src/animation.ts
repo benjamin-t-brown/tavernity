@@ -18,21 +18,19 @@ export function createAnimation([animLoop, animName, animSprites]: [
   name: string,
   sprites: Partial<AnimSprite>[]
 ]) {
-  let name: string;
-  let loop: boolean;
-  let sprites: AnimSprite[];
+  // const name: string = animName;
+  const loop: boolean = animLoop || false;
+  let sprites: AnimSprite[] = [];
   let done: boolean;
   let totalDurationMs: number;
   let currentSpriteIndex: number;
   let timestampStart: number;
 
-  loop = animLoop || false;
   sprites = [];
   done = false;
   totalDurationMs = 0;
   currentSpriteIndex = 0;
   timestampStart = 0;
-  name = animName;
 
   const addSprite = ({
     n,
