@@ -8,7 +8,7 @@ Game: Tavernity
 
 In this game you run a medieval tavern as best you can before your patrons burn it to the ground.
 
-Controls: Arrows and Space Bar
+Controls: Arrows/Numpad and Space Bar
 
 Development
 
@@ -22,6 +22,6 @@ Run:
 
 Build Submission Zip File:
 
-`yarn build` -->
+`yarn build`
 
 requires "advzip" from advancemame

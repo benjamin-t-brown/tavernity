@@ -422,10 +422,10 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       }
     );
 
-    drawText(`Patrons To Spawn: ${spawnOrch.getRemaining()}`, 16, 40, {
-      size: 24,
-      align: 'left',
-    });
+    // drawText(`Patrons To Spawn: ${spawnOrch.getRemaining()}`, 16, 40, {
+    //   size: 24,
+    //   align: 'left',
+    // });
 
     drawText(`Level: ${levelOrch.getTotalLevel()}`, 16, height - 16, {
       size: 24,
