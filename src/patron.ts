@@ -7,12 +7,14 @@ import {
   TABLE_HORIZONTAL,
   TABLE_VERTICAL,
   createAnimationFromDb,
+  isFloorTile,
 } from './db';
 import { drawSprite } from './draw';
 import {
   Direction,
   Rect,
   Timer,
+  createAdjacentIterArray,
   playSound,
   pointsEq,
   randInArr,
@@ -35,7 +37,6 @@ type PatronStatePerson =
   | 'waitForClear'
   | 'leaving'
   | 'rioting'
-  | 'findMug'
   | 'none';
 
 type PatronStateMole =
@@ -48,13 +49,16 @@ type PatronStateMole =
 export interface Patron extends Actor {
   type: 'person' | 'mole';
   getState(): PatronStatePerson | PatronStateMole;
+  setPersonState(s: PatronStatePerson): void;
 }
 
 export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
   const actor = createActor();
 
-  const walkTimer = new Timer(type === 'person' ? 200 : 400);
-  const patienceTimer = new Timer(10000);
+  const walkTimer = new Timer(type === 'person' ? 150 : 300);
+  const walkTimeoutTimer = new Timer(1000);
+  let isWalkTimingOut = false;
+  const patienceTimer = new Timer(20000);
   const drinkTimer = new Timer(3000);
   const fireTimer = new Timer(1000);
   const moleDestroyTimer = new Timer(2000);
@@ -84,6 +88,9 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
         case 'rioting':
           return getAnim('p_angry');
         case 'waitForDrink':
+          return patienceTimer.pct() < 0.5
+            ? getAnim('p_wait')
+            : getAnim('p2_wait');
         case 'waitForClear':
         case 'none':
           return getAnim('p_wait');
@@ -103,7 +110,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
       waitForClearTimer.start();
     }
     if (state === 'rioting') {
-      // playSound('patronAngry');
+      playSound('patronAngry');
     }
     if (state === 'leaving') {
       getGame().tileOrch.restoreTile(cl, 'Table');
@@ -130,7 +137,6 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
       game.tileOrch.restoreTile(cl, 'MoleTable');
       const tile = game.tileOrch.isTileAvailable('MoleTable');
       if (!tile) {
-        console.log('set mole leaving');
         setMoleState('leaving');
       }
     }
@@ -168,6 +174,22 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
         playSound('doorOpen');
         game.room.setTileAt(cl.x, cl.y, tileId + 1);
       });
+    } else {
+      if (isWalkTimingOut) {
+        if (walkTimeoutTimer.isDone()) {
+          isWalkTimingOut = false;
+          for (const [_x, _y] of createAdjacentIterArray(cl.getPos())) {
+            const tile = game.room.getTileAt(_x, _y);
+            if (isFloorTile(tile[0])) {
+              cl.x = _x;
+              cl.y = _y;
+            }
+          }
+        }
+      } else {
+        isWalkTimingOut = true;
+        walkTimeoutTimer.start();
+      }
     }
   };
 
@@ -248,7 +270,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
         fireTimer.start();
       } else if (patronStatePerson === 'rioting') {
         if (fireTimer.isDone()) {
-          if (Math.random() > 0.9) {
+          if (Math.random() > 0.95) {
             game.setAdjTableOnFire(cl.getPos());
             fireTimer.start();
           }
@@ -278,6 +300,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
         if (game.room.isTileVisible(cl.x, cl.y)) {
           playSound('plusOne');
         }
+        game.levelOrch.incScore();
         game.particles.push(createParticle('part_+1_l', 300, cl.x, cl.y));
         setPersonState('leaving');
       }
@@ -323,6 +346,9 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
     getState() {
       return type === 'person' ? patronStatePerson : patronStateMole;
     },
+    setPersonState(s: PatronStatePerson) {
+      setPersonState(s);
+    },
     getPos: (): Point => {
       return [cl.x, cl.y];
     },
@@ -337,6 +363,9 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
       const anim = typeToAnim(type);
       anim.update();
       const sprite = anim.getSprite();
+
+      // if (patronStatePerson
+
       drawSprite(sprite, cl.x * 16, cl.y * 16);
 
       if (patronStatePerson === 'drinking' && mugItem) {

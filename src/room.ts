@@ -6,7 +6,7 @@ import { Point, Timer, at, getModalText, printArr } from './utils';
 import { rand } from './zzfx';
 import { createVisibilityMaps } from './flood';
 import { Actor, createActor } from './actor';
-import { ON_FIRE, roomNumberToLevel } from './db';
+import { CLOSED_DOOR, ON_FIRE, roomNumberToLevel } from './db';
 
 export interface Room extends Actor {
   w: number;
@@ -14,11 +14,11 @@ export interface Room extends Actor {
   tiles: Tile[];
   visMaps: number[][];
   spawns: Point[];
+  reset: (level: number) => void;
   getTileAt: (x: number, y: number, orig?: boolean) => Tile;
   setTileAt: (x: number, y: number, tileId: number) => void;
-  getTileLevel: (t: Tile) => number;
+  getTileLevel: (t: Tile, max?: boolean) => number;
   isTileVisible(x: number, y: number, visMapInds?: number[]): boolean;
-  reset: () => void;
 }
 
 export type Tile = [number /*id*/, number /*tileX*/, number /*tileY*/];
@@ -63,7 +63,19 @@ export const createRoom = (
     h: roomWidth,
     spawns,
     visMaps: createVisibilityMaps(tiles, roomWidth),
-    tiles: structuredClone(originalTiles),
+    tiles: originalTiles,
+    reset: (level: number) => {
+      const tiles = structuredClone(originalTiles);
+      for (let i = 0; i < tiles.length; i++) {
+        const tile = tiles[i];
+        const maxLevel = cl.getTileLevel(tile, true);
+        // console.log('check maxlevel vs level', tile, maxLevel, level);
+        if (tile[0] === CLOSED_DOOR && maxLevel > level) {
+          tile[0]--;
+        }
+      }
+      cl.tiles = tiles;
+    },
     getTileAt: (tx: number, ty: number, orig?: boolean) => {
       const tiles = orig ? originalTiles : cl.tiles;
       const tile = tiles[ty * roomWidth + tx];
@@ -75,18 +87,25 @@ export const createRoom = (
         t[0] = tileId;
       }
     },
-    getTileLevel: (t: Tile) => {
+    getTileLevel: (t: Tile, max?: boolean) => {
       const [tileId, tx, ty] = t;
       if (tileId === 0) {
         return 0;
       }
+      let maxRoomLevel = 0;
       for (const visMap of cl.visMaps) {
         const roomNumber = visMap[ty * roomWidth + tx];
         if (roomNumber) {
-          return roomNumberToLevel(roomNumber);
+          const level = roomNumberToLevel(roomNumber);
+          if (level > maxRoomLevel) {
+            maxRoomLevel = level;
+            if (!max) {
+              return maxRoomLevel;
+            }
+          }
         }
       }
-      return 0;
+      return maxRoomLevel;
     },
     isTileVisible: (tx: number, ty: number) => {
       const isVisible = visMapInds.reduce(
@@ -95,7 +114,6 @@ export const createRoom = (
       );
       return isVisible;
     },
-    reset: () => {},
     update: () => {
       visMapInds = calculateVisMapInds();
 
@@ -120,10 +138,6 @@ export const createRoom = (
         }
       }
     },
-  };
-
-  const findTile = (arr: Tile[], searchTileId: number) => {
-    return arr.find(([tileId]) => tileId === searchTileId) as Tile;
   };
 
   // for (const visMap of cl.visMaps) {

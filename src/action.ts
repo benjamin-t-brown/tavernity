@@ -73,7 +73,12 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
     }
   }
 
-  if (adjItemResult && (!player.itemLeft || !player.itemRight)) {
+  if ((localAdjTile = game.getAdjTile([player.x, player.y], [RUBBLE]))) {
+    return {
+      type: ACTION_REPAIR,
+      tile: localAdjTile,
+    };
+  } else if (adjItemResult && (!player.itemLeft || !player.itemRight)) {
     const [item, , [x, y]] = adjItemResult;
     // if it's a full mug with an adjacent PersonPatron who is thirsty, then don't allow pickup
     if (adjItemResult[0].name === 'mugFull') {
@@ -144,15 +149,6 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
       type: ACTION_PUTDOWN_LEFT,
       tile: localAdjTile,
       item: player.itemLeft,
-    };
-  } else if (
-    !player.itemLeft &&
-    !player.itemRight &&
-    (localAdjTile = game.getAdjTile([player.x, player.y], [RUBBLE]))
-  ) {
-    return {
-      type: ACTION_REPAIR,
-      tile: localAdjTile,
     };
   }
 };

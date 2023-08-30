@@ -21,6 +21,7 @@ export const initDbAnims = () => {
     // ['pl_2', ['s_2']],
     ['p_walk', ['s_3']],
     ['p_wait', ['s_3', 's_4']],
+    ['p2_wait', ['s_5', 's_6']],
     ['p_angry', ['s_7', 's_8']],
     ['part_+1', ['s_39']],
     ['water', ['s_40']],
@@ -77,6 +78,16 @@ export const initDbSounds = () => {
   dbSounds.fire = [1.06,,1028,.11,.14,.03,4,.15,-4.8,,-690,.18,,.1,,.4,.07,.99,.15];
   // prettier-ignore
   dbSounds.destroyCrate = [,,80,.04,.03,.2,4,.34,-0.3,,,,,,-9.9,,,,.18];
+  // prettier-ignore
+  dbSounds.levelDone = [1.04,,3,.06,.09,.09,1,.84,,14,,,,,5.2,,,.43,.13];
+  // prettier-ignore
+  dbSounds.levelScreen = [1.85,,123,.15,.15,.01,2,1.15,,-54,,,.26,,.3,,.06,.7,.03,.04];
+  // prettier-ignore
+  dbSounds.startLevel = [1.05,,0,.01,.17,.17,1,1.56,,73,225,.01,.09,,-0.1,,,.43];
+  // prettier-ignore
+  dbSounds.gameOver = [1.7,,146,.22,.07,.18,4,2.48,,82,,,,,253,,.21,,,.01];
+  // prettier-ignore
+  dbSounds.timerTick = [,,1091,.18,.02,.17,4,.91,,-42,,,,,167,,,,.02];
 
   // dbSounds.moleSpawn = [2.09,,326,.08,,0,4,.02,,4,,,.11,,28,,.1,.01,.22,.67];
 };
@@ -124,10 +135,24 @@ export const RUBBLE = 14;
 export const ON_FIRE = 15;
 export const CRATE = 17;
 
-const roomOrder = [3, 4, 6, 5, 2, 1];
-export const levelToRoomNumber = (level: number) => {
-  return roomOrder[level + 1] || 3;
-};
+export const LevelMessages = [
+  '',
+  '"Hey, barkeep!\nFill a mug and set it down\nhere in front of me."',
+  "Looks like it's busy today.\nPatrons are overflowing to the side room.",
+  'In Case of Fire:\nFETCH BUCKET OF WATER\nFROM WELL OUTSIDE',
+  'We need more tables!\nOpen up the other side room!',
+  "We're attracting moles now!\nGrab a weapon when you see 'em!\nThat's why we have a weapons rack!",
+  'Business is booming!\nWe have a whole new taproom now!',
+  'A bigger tavern always\nattracts more moles.',
+  'We need to expand again!\nTheres even more space\nin the back.',
+  'Another server would be nice...',
+  'We can squeeze a few more\n in the second taproom.',
+];
+
+const roomOrder = [4, 2, 6, 5, 1, 3];
+// export const levelToRoomNumber = (level: number) => {
+//   return roomOrder[level - 1] || 3;
+// };
 export const roomNumberToLevel = (roomNumber: number) => {
   return roomOrder.indexOf(roomNumber) + 1;
 };

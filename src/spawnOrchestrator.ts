@@ -2,12 +2,16 @@ import { getGame } from './game';
 import { createPatron } from './patron';
 import { Point, Timer, playSound, pointsEq, randInArr } from './utils';
 
-interface SpawnOrchestrator {
-  start: (level: number) => void;
+export interface SpawnOrchestrator {
+  lvlTimer: Timer;
+  start: (level: number, totalLevel: number) => void;
   stop: () => void;
   isDone: () => boolean;
+  getRemaining: () => number;
   update: () => void;
 }
+
+export const LEVEL_TIMER_MS = 60000;
 
 export const createSpawnOrchestrator = (): SpawnOrchestrator => {
   const personSpawnTimer1 = new Timer(1);
@@ -19,6 +23,11 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
 
   let moleSpawned = 0;
   let totalMoleToSpawn = 0;
+
+  const calcSpawnRate = () =>
+    1 +
+    Math.random() *
+      Math.min(7000, ((LEVEL_TIMER_MS - 5000) * (1 - cl.lvlTimer.pct())) / 2);
 
   const getSpawnTiles = () => {
     const game = getGame();
@@ -55,36 +64,62 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
     } while (tile && spawnTiles.length > 0);
 
     if (!tile) {
+      console.log('suppress person spawn no tile available');
       return false;
     }
 
     // don't spawn a person unless there is a table available for them
     if (type === 'person' && !game.tileOrch.isTileAvailable('Table')) {
+      console.log('suppress person spawn no table available');
       return false;
     }
 
     const patron = createPatron(type, tx, ty);
+    console.log('SPAWN PERSON', tx, ty, patron);
     game.patrons.push(patron);
-    console.log('spawn patron', patron, tx, ty);
     return true;
   };
 
   const cl: SpawnOrchestrator = {
-    start: (l: number) => {
+    lvlTimer: new Timer(LEVEL_TIMER_MS + 40000),
+    // lvlTimer: new Timer(5000),
+    start: (l: number, totalLevel: number) => {
       enabled = true;
-      personSpawnTimer1.ms = 100;
+      personSpawnTimer1.ms = 5000 + Math.random() * 5000;
       personSpawnTimer1.start();
+
       spawned = 0;
-      totalToSpawn = 10 + l * 2;
-      totalMoleToSpawn = 1;
+      totalToSpawn = 5 + Math.floor(totalLevel * 1.75);
+      // totalToSpawn = totalLevel < 4 ? 1 : 5 + Math.floor(totalLevel * 1.75);
+      totalMoleToSpawn = (() => {
+        switch (true) {
+          case [5, 7].includes(totalLevel):
+            return 2;
+          // case [6, 7].includes(totalLevel):
+          //   return 2;
+          case [8, 9].includes(totalLevel):
+            return 3;
+          case totalLevel > 9:
+            return 4;
+          // case [1, 2].includes(totalLevel):
+          default:
+            return 0;
+        }
+      })();
+      moleSpawnTimer1.ms = LEVEL_TIMER_MS / (totalMoleToSpawn + 1);
+      moleSpawnTimer1.start();
       moleSpawned = 0;
       level = l;
+      cl.lvlTimer.start();
     },
-    stop: () => {
+    stop() {
       enabled = false;
     },
-    isDone: () => {
+    isDone() {
       return spawned >= totalToSpawn;
+    },
+    getRemaining() {
+      return totalToSpawn - spawned;
     },
     update() {
       if (!enabled) {
@@ -94,16 +129,16 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
         return;
       }
 
-      // if (personSpawnTimer1.isDone()) {
-      //   personSpawnTimer1.ms = 1000 + Math.random() * 10000;
-      //   // personSpawnTimer1.ms = 500;
-      //   personSpawnTimer1.start();
-      //   if (spawn('person')) {
-      //     spawned++;
-      //   }
-      // }
+      if (personSpawnTimer1.isDone()) {
+        personSpawnTimer1.ms = calcSpawnRate();
+        // personSpawnTimer1.ms = 500;
+        personSpawnTimer1.start();
+        if (spawn('person')) {
+          spawned++;
+        }
+      }
       if (moleSpawnTimer1.isDone() && moleSpawned < totalMoleToSpawn) {
-        moleSpawnTimer1.ms = 500;
+        // moleSpawnTimer1.ms = 15000;
         moleSpawnTimer1.start();
         if (spawn('mole')) {
           playSound('moleAlert');

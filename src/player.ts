@@ -88,7 +88,7 @@ export const createPlayer = () => {
       playSound('item');
       cl.itemRight = item;
     } else {
-      getGame().showWarning('Your hands are full!');
+      // getGame().showWarning('Your hands are full!');
     }
   };
 
@@ -159,6 +159,12 @@ export const createPlayer = () => {
       const [id] = game.room.getTileAt(x, y);
       if (id === ON_FIRE) {
         game.room.setTileAt(x, y, RUBBLE);
+        for (const [x2, y2] of createAdjacentIterArray([x, y])) {
+          const patron = game.getPatronAt(x2, y2);
+          if (patron?.getState() === 'rioting') {
+            patron.setPersonState('waitForDrink');
+          }
+        }
       }
       game.particles.push(createParticle('water_l', 300, x, y));
     }
@@ -173,23 +179,29 @@ export const createPlayer = () => {
     playSound('repair');
   };
 
+  const areKeysDown = (keys: string[]) => {
+    return keys.reduce((prev, curr) => prev || isKeyDown(curr), false);
+  };
+
   const handleKeyUpdate = () => {
     if (cl.ctrlEnabled) {
       if (keyPressTimer1.isDone() && keyPressTimer2.isDone()) {
         const { x, y } = cl;
         let moved = false;
-        if (isKeyDown('ArrowUp')) {
+        if (areKeysDown(['ArrowUp', '8', '7', '9', 'Home', 'PageUp'])) {
           cl.y--;
           moved = true;
-        } else if (isKeyDown('ArrowDown')) {
+        }
+        if (areKeysDown(['ArrowDown', '2', '1', '3', 'End', 'PageDown'])) {
           cl.y++;
           moved = true;
         }
 
-        if (isKeyDown('ArrowLeft')) {
+        if (areKeysDown(['ArrowLeft', '7', '4', '1', 'Home', 'End'])) {
           cl.x--;
           moved = true;
-        } else if (isKeyDown('ArrowRight')) {
+        }
+        if (areKeysDown(['ArrowRight', '9', '6', '3', 'PageUp', 'PageDown'])) {
           cl.x++;
           moved = true;
         }
@@ -219,6 +231,8 @@ export const createPlayer = () => {
 
   window.addEventListener('keydown', (e) => {
     const game = getGame();
+
+    // console.log('keydown', e.key);
     if (e.key === ' ') {
       const action = getAvailableAction(game);
       if (!action) {
@@ -265,7 +279,7 @@ export const createPlayer = () => {
           handleRepair(tile as Tile);
         },
       };
-      actions[type]();
+      actions[type]?.();
     }
   });
 
@@ -276,14 +290,14 @@ export const createPlayer = () => {
 
   const cl: Player = Object.assign(createActor(), {
     dir: 'l' as Direction,
-    x: 18,
-    y: 8,
+    x: 0,
+    y: 0,
     itemLeft: undefined,
     itemRight: undefined,
     ctrlEnabled: true,
     reset() {
-      cl.itemLeft = undefined;
-      cl.itemRight = undefined;
+      // cl.itemLeft = undefined;
+      // cl.itemRight = undefined;
     },
     update() {
       handleKeyUpdate();
