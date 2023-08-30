@@ -1,6 +1,6 @@
 js13k2023 Competition Entry
 
-<!-- [Play here!](https://benjamin-t-brown.github.io/tavernity/index.html) -->
+[Play here!](https://benjamin-t-brown.github.io/tavernity/index.html)
 
 Theme: 13 Century
 

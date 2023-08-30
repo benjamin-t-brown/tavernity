@@ -75,7 +75,6 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
     }
 
     const patron = createPatron(type, tx, ty);
-    console.log('SPAWN PERSON', tx, ty, patron);
     game.patrons.push(patron);
     return true;
   };
