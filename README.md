@@ -24,4 +24,4 @@ Build Submission Zip File:
 
 `yarn build` -->
 
-requires "advzip" and "advping" from advancemame
+requires "advzip" from advancemame
