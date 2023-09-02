@@ -70,4 +70,5 @@ const loop = (game: Game) => {
 (window as any).vol = (input: HTMLInputElement) => {
   const v = (Number(input.value) * 0.3) / 100;
   setVolume(v);
+  console.log('SET VOL', v)
 };

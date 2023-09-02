@@ -232,6 +232,10 @@ export const createPlayer = () => {
   window.addEventListener('keydown', (e) => {
     const game = getGame();
 
+    if (game.isPaused()) {
+      return;
+    }
+
     // console.log('keydown', e.key);
     if (e.key === ' ') {
       const action = getAvailableAction(game);
@@ -258,7 +262,13 @@ export const createPlayer = () => {
           handlePutDownItemOnTable('Left', tile as Tile);
         },
         [ACTION_PUTDOWN_RIGHT]: () => {
-          handlePutDownItemOnTable('Right', tile as Tile);
+          if (cl.itemLeft?.name === 'mugFull') {
+            handlePutDownItemOnTable('Left', tile as Tile);
+            cl.itemLeft = cl.itemRight;
+            cl.itemRight = undefined;
+          } else {
+            handlePutDownItemOnTable('Right', tile as Tile);
+          }
         },
         [ACTION_FILL_LEFT]: () => {
           handleFillMug(cl.itemLeft as Item);
@@ -328,10 +338,10 @@ export const createPlayer = () => {
         (cl.itemLeft as Item).drawAt(cl.x * 16 - 6, cl.y * 16 + yOffset, true);
       } else {
         if (cl.itemLeft) {
-          cl.itemLeft.drawAt(cl.x * 16 - 8, cl.y * 16 - 6, true);
+          cl.itemLeft.drawAt(cl.x * 16 - 8, cl.y * 16 - 5, true);
         }
         if (cl.itemRight) {
-          cl.itemRight.drawAt(cl.x * 16 + 8, cl.y * 16 - 6);
+          cl.itemRight.drawAt(cl.x * 16 + 8, cl.y * 16 - 5);
         }
       }
     },

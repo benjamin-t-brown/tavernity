@@ -24,13 +24,13 @@
         align-items: center;
         margin: 4px;
       }
-      #modal {
+      /* #modal {
         position: fixed;
         background: rgba(0, 0, 0, 0.75);
         padding: 25px;
         font-size: 24px;
         transform: translateY(-100%);
-      }
+      } */
       #key-info {
         position: fixed;
         bottom: 0;
@@ -38,6 +38,7 @@
         width: 100%;
         font-size: 20px;
         color: white;
+        pointer-events: none;
       }
       #key-info >span{
         padding: 4px;
@@ -48,18 +49,18 @@
         transform: translateY(-164px) !important;
         color: #F55;
       }
-      @keyframes fl {
+      /* @keyframes fl {
         from {color: black}
         to {color: white;}
-      }
-      .anim {
+      } */
+      /* .anim {
         animation: fl 0.5s linear infinite;
         position: absolute;
         bottom: 0;
         right: 0;
         margin: 8px;
         font-size: 14px;
-      }
+      } */
       
     </style>
     <div id="canvasDiv" class="canvas-div">
@@ -75,8 +76,8 @@
       </div> -->
     </div>
     <div id="key-info" class="canvas-div">
-      <span>a</span> <!--Key Item Text -->
-      <span class="key-info-warn">a</span> <!--Warning Text -->
+      <span></span> <!--Key Item Text -->
+      <!-- <span class="key-info-warn">a</span> -->
     </div>
     <script src="index.ts" type="module"></script>
   </body>

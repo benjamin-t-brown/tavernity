@@ -10,20 +10,20 @@ export type ItemName =
   | 'mugEmpty'
   | 'mugFull'
   | 'sword'
-  | 'buoy'
+  // | 'buoy'
   | 'hammer'
   | 'bucketFull';
 
 export const itemNameToLabel = (itemName: ItemName): string => {
   const labels: Record<ItemName, string> = {
-    mugEmpty: 'Empty Mug',
-    mugFull: 'Full Mug',
+    mugEmpty: 'Mug',
+    mugFull: 'Mug',
     sword: 'Sword',
-    buoy: 'Buoy',
+    // buoy: 'Buoy',
     hammer: 'Hammer',
     bucketFull: 'Bucket',
   };
-  return labels[itemName];
+  return labels[itemName] ?? 'Item';
 };
 
 export const itemNameToSprite = (itemName: ItemName) => {
@@ -36,8 +36,8 @@ export const itemNameToSprite = (itemName: ItemName) => {
           return 's_29';
         case 'sword':
           return 's_31';
-        case 'buoy':
-          return 's_32';
+        // case 'buoy':
+        //   return 's_32';
         case 'bucketFull':
           return 's_34';
       }

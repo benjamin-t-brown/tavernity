@@ -8,7 +8,14 @@ import {
   playSound,
 } from './utils';
 import { Room, Tile, createRoom } from './room';
-import { drawRect, drawSprite, drawText, getCanvas, getCtx } from './draw';
+import {
+  DrawTextParams,
+  drawRect,
+  drawSprite,
+  drawText,
+  getCanvas,
+  getCtx,
+} from './draw';
 import {
   Item,
   ItemName,
@@ -60,7 +67,7 @@ export interface Game {
   getPatronAt: (x: number, y: number) => Patron | undefined;
   getAdjTile: ([x, y]: Point, tileIds: number[]) => Tile | undefined;
   getAdjItem: (p: Point) => AdjItem | undefined;
-  showWarning: (text: string) => void;
+  // showWarning: (text: string) => void;
   setup: () => void;
   isPaused: () => boolean;
   update: (fm: number) => void;
@@ -72,7 +79,7 @@ export const getGame = (): Game => {
 };
 
 export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
-  const PLAYER_START = [13, 18];
+  const PLAYER_START = [0, 0];
 
   const room: Room = createRoom(tiles, mapWidth, spawns);
   const spawnOrch = createSpawnOrchestrator();
@@ -87,7 +94,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
   const keyInfo = document.getElementById('key-info') as HTMLDivElement;
   const pickUpNotif = keyInfo.children[0] as HTMLDivElement;
-  const warnNotif = keyInfo.children[1] as HTMLDivElement;
+  // const warnNotif = keyInfo.children[1] as HTMLDivElement;
   let lastLabel = '';
 
   const player = ((window as any).player = createPlayer());
@@ -101,20 +108,22 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
   window.addEventListener('keydown', (e) => {
     if (e.key === ' ') {
-      if (menu) {
-        playSound('itemPlace');
-        hideMenu();
-        showLevelMessageScreen();
-      } else if (endOfLevelScreen) {
-        playSound('itemPlace');
-        hideEndOfLevelScreen();
-      } else if (levelMessageScreen) {
-        playSound('startLevel');
-        hideLevelMessageScreen();
-      } else if (gameOverScreen) {
-        playSound('itemPlace');
-        hideGameOverScreen();
-      }
+      setTimeout(() => {
+        if (menu) {
+          playSound('itemPlace');
+          hideMenu();
+          showLevelMessageScreen();
+        } else if (endOfLevelScreen) {
+          playSound('itemPlace');
+          hideEndOfLevelScreen();
+        } else if (levelMessageScreen) {
+          playSound('startLevel');
+          hideLevelMessageScreen();
+        } else if (gameOverScreen) {
+          playSound('itemPlace');
+          hideGameOverScreen();
+        }
+      }, 1);
     }
   });
 
@@ -171,7 +180,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
   const showGameOverScreen = () => {
     gameOverScreen = true;
     pickUpNotif.style.opacity = '0';
-    warnNotif.style.opacity = '0';
+    // warnNotif.style.opacity = '0';
     lastScore = levelOrch.getScore()[2];
   };
   const hideGameOverScreen = () => {
@@ -226,7 +235,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
     drawWalls(width - 16 * scale, scale, true);
 
     pickUpNotif.style.opacity = '0';
-    warnNotif.style.opacity = '0';
+    // warnNotif.style.opacity = '0';
 
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < 7; j++) {
@@ -307,6 +316,11 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
     const [score, crateBonus, totalScore] = levelOrch.getScore();
 
+    const subTextParams: DrawTextParams = {
+      size: 24,
+      align: 'center',
+    };
+
     drawText(
       `Level ${levelOrch.getTotalLevel()} Complete`,
       width / 2,
@@ -324,28 +338,19 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       `Crate Bonus: ${crateBonus}`,
       width / 2,
       height / 2 + 2 * 12 * scale,
-      {
-        size: 24,
-        align: 'center',
-      }
+      subTextParams
     );
     drawText(
       `Total Score: ${totalScore}`,
       width / 2,
       height / 2 + 3 * 12 * scale,
-      {
-        size: 24,
-        align: 'center',
-      }
+      subTextParams
     );
     drawText(
       'Press (SPACE) to start',
       width / 2,
       height / 2 + 4 * 12 * scale + 16,
-      {
-        size: 24,
-        align: 'center',
-      }
+      subTextParams
     );
   };
 
@@ -412,15 +417,12 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
     const { width, height } = ctx.canvas;
     const numWaitingPatrons = getNumRemainingPatrons();
 
-    drawText(
-      `Patrons Remaining: ${spawnOrch.getRemaining() + numWaitingPatrons}`,
-      16,
-      16,
-      {
-        size: 24,
-        align: 'left',
-      }
-    );
+    drawText(`${spawnOrch.getRemaining() + numWaitingPatrons}`, 64, 32, {
+      size: 24,
+      align: 'left',
+    });
+    drawRect(4, 4, 16 * 3, 16 * 3 + 4, 'rgba(255, 255, 255, 0.5)');
+    drawSprite('s_3', 4, 4, 3);
 
     // drawText(`Patrons To Spawn: ${spawnOrch.getRemaining()}`, 16, 40, {
     //   size: 24,
@@ -433,7 +435,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
     });
 
     if (endLevel) {
-      drawText(`Level ending soon...`, width / 2, 64, {
+      drawText(`Level ending soon...`, width / 2, 128, {
         size: 24,
         align: 'center',
       });
@@ -442,12 +444,10 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       !(spawnOrch.isDone() && numWaitingPatrons === 0)
     ) {
       const secondsRemaining = Math.floor(
-        ((1 - spawnOrch.lvlTimer.pct()) * (LEVEL_TIMER_MS + 40000)) / 1000
+        ((1 - spawnOrch.lvlTimer.pct()) * spawnOrch.getMaxTime()) / 1000
       );
       drawText(
-        `Time: ${Math.floor(
-          ((1 - spawnOrch.lvlTimer.pct()) * (LEVEL_TIMER_MS + 40000)) / 1000
-        )}`,
+        `Time: ${Math.floor(secondsRemaining)}`,
         width - (secondsRemaining <= 10 ? 1 * 16 : 1 * 24),
         16,
         {
@@ -481,7 +481,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         [4, 15],
         [21, 11],
         [21, 10],
-        [17, 14],
+        [17, 13],
         [15, 3],
         [21, 3],
       ]) {
@@ -522,29 +522,8 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       console.log('setup');
       levelOrch.reset();
       cl.items = [];
-      // for (let i = 0; i < 5; i++) {
-      //   levelOrch.incLevel();
-      // }
-      // levelOrch.level = 3;
       setupNextLevel();
       endLevel = false;
-      // cl.items = [];
-      // cl.patrons = [];
-      // cl.particles = [];
-      // cl.fParticles = [];
-      // cl.tileOrch = createTileOrchestrator(room, 1);
-
-      // cl.items.push(createItem('mugEmpty', 5, 7));
-      // cl.items.push(createItem('mugEmpty', 6, 7));
-      // cl.items.push(createItem('mugEmpty', 10, 10));
-
-      // // cl.patrons.push(createPatron('person', 5, 8));
-      // // cl.patrons.push(createPatron('person', 12, 4));
-
-      // player.x = 13;
-      // player.y = 18;
-
-      // spawnOrch.start(1);
     },
     isPaused() {
       return menu || endOfLevelScreen || levelMessageScreen || gameOverScreen;
@@ -602,11 +581,11 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         return [lastItem, ctr, lastPoint];
       }
     },
-    showWarning(text: string) {
-      warnNotif.style.opacity = '1';
-      warnNotif.innerHTML = text;
-      warningTimer.start();
-    },
+    // showWarning(text: string) {
+    //   warnNotif.style.opacity = '1';
+    //   warnNotif.innerHTML = text;
+    //   warningTimer.start();
+    // },
     update(fm: number) {
       if (cl.isPaused()) {
         return;
@@ -682,32 +661,36 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
         let nextLabel = '';
 
+        const keypress = '(SPACE)';
+
         switch (type) {
           case ACTION_PICKUP_LEFT:
           case ACTION_PICKUP_RIGHT:
             nextLabel = `Pick up ${itemNameToLabel(
               (item as Item).name
-            )} (Space)`;
+            )} ${keypress}`;
             break;
           case ACTION_PICKUP_WEAPON:
-            nextLabel = `Pick up Sword (Space)`;
+            nextLabel = `Pick up Sword ${keypress}`;
             break;
           case ACTION_PICKUP_BUCKET:
-            nextLabel = `Pick up Water Bucket (Space)`;
+            nextLabel = `Pick up Water Bucket ${keypress}`;
             break;
           case ACTION_PUTDOWN_LEFT:
           case ACTION_PUTDOWN_RIGHT:
-            nextLabel = `Place ${itemNameToLabel((item as Item).name)} (Space)`;
+            nextLabel = `Place ${itemNameToLabel(
+              (item as Item).name
+            )} ${keypress}`;
             break;
           case ACTION_FILL_LEFT:
           case ACTION_FILL_RIGHT:
-            nextLabel = `Fill Mug (Space)`;
+            nextLabel = `Fill Mug ${keypress}`;
             break;
           case ACTION_PUTDOWN_WEAPON:
-            nextLabel = `Put away Sword (Space)`;
+            nextLabel = `Put away Sword ${keypress}`;
             break;
           case ACTION_REPAIR:
-            nextLabel = `Repair (Space)`;
+            nextLabel = `Repair ${keypress}`;
             break;
         }
 
@@ -718,9 +701,9 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         }
       }
 
-      if (warningTimer.isDone()) {
-        warnNotif.style.opacity = '0';
-      }
+      // if (warningTimer.isDone()) {
+      //   warnNotif.style.opacity = '0';
+      // }
 
       ctx.restore();
 

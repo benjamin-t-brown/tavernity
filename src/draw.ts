@@ -1,6 +1,6 @@
 import { Point, getNow } from './utils';
 
-interface DrawTextParams {
+export interface DrawTextParams {
   font?: string;
   color?: string;
   size?: number;

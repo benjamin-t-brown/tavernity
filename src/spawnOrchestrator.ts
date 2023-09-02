@@ -8,10 +8,11 @@ export interface SpawnOrchestrator {
   stop: () => void;
   isDone: () => boolean;
   getRemaining: () => number;
+  getMaxTime: () => number;
   update: () => void;
 }
 
-export const LEVEL_TIMER_MS = 60000;
+export const LEVEL_TIMER_MS = 60000 + 40000;
 
 export const createSpawnOrchestrator = (): SpawnOrchestrator => {
   const personSpawnTimer1 = new Timer(1);
@@ -23,11 +24,17 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
 
   let moleSpawned = 0;
   let totalMoleToSpawn = 0;
+  let spawnTimerOffset = 0;
 
   const calcSpawnRate = () =>
     1 +
     Math.random() *
-      Math.min(7000, ((LEVEL_TIMER_MS - 5000) * (1 - cl.lvlTimer.pct())) / 2);
+      Math.min(
+        7000,
+        (((LEVEL_TIMER_MS + spawnTimerOffset) / 1.5 - 5000) *
+          (1 - cl.lvlTimer.pct())) /
+          2
+      );
 
   const getSpawnTiles = () => {
     const game = getGame();
@@ -80,12 +87,19 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
   };
 
   const cl: SpawnOrchestrator = {
-    lvlTimer: new Timer(LEVEL_TIMER_MS + 40000),
+    lvlTimer: new Timer(LEVEL_TIMER_MS + spawnTimerOffset),
     // lvlTimer: new Timer(5000),
     start: (l: number, totalLevel: number) => {
       enabled = true;
       personSpawnTimer1.ms = 5000 + Math.random() * 5000;
       personSpawnTimer1.start();
+
+      if (totalLevel > 5) {
+        spawnTimerOffset += 1000;
+      }
+
+      cl.lvlTimer.ms = LEVEL_TIMER_MS + spawnTimerOffset;
+      cl.lvlTimer.start();
 
       spawned = 0;
       totalToSpawn = 5 + Math.floor(totalLevel * 1.75);
@@ -93,23 +107,25 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
       totalMoleToSpawn = (() => {
         switch (true) {
           case [5, 7].includes(totalLevel):
-            return 2;
+            return 1;
           // case [6, 7].includes(totalLevel):
           //   return 2;
-          case [8, 9].includes(totalLevel):
-            return 3;
+          case [9].includes(totalLevel):
+            return 2;
           case totalLevel > 9:
-            return 4;
+            return 3;
           // case [1, 2].includes(totalLevel):
           default:
             return 0;
         }
       })();
-      moleSpawnTimer1.ms = LEVEL_TIMER_MS / (totalMoleToSpawn + 1);
+      moleSpawnTimer1.ms =
+        (LEVEL_TIMER_MS + spawnTimerOffset - 10000) /
+        2 /
+        (totalMoleToSpawn + 1);
       moleSpawnTimer1.start();
       moleSpawned = 0;
       level = l;
-      cl.lvlTimer.start();
     },
     stop() {
       enabled = false;
@@ -119,6 +135,9 @@ export const createSpawnOrchestrator = (): SpawnOrchestrator => {
     },
     getRemaining() {
       return totalToSpawn - spawned;
+    },
+    getMaxTime() {
+      return cl.lvlTimer.ms;
     },
     update() {
       if (!enabled) {

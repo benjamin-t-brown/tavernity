@@ -145,8 +145,8 @@ export const LevelMessages = [
   'Business is booming!\nWe have a whole new taproom now!',
   'A bigger tavern always\nattracts more moles.',
   'We need to expand again!\nTheres even more space\nin the back.',
-  'Another server would be nice...',
-  'We can squeeze a few more\n in the second taproom.',
+  'A bouncer would be nice\nto remove of all these moles!',
+  'We can squeeze a few more\n in the private taproom.',
 ];
 
 const roomOrder = [4, 2, 6, 5, 1, 3];
