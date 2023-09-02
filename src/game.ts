@@ -479,7 +479,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         [5, 12],
         [8, 10],
         [4, 15],
-        [21, 11],
+        [21, 9],
         [21, 10],
         [17, 13],
         [15, 3],
