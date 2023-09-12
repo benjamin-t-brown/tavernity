@@ -11,31 +11,31 @@ import { Tile } from './room';
 import { createAdjacentIterArray } from './utils';
 
 type ActionType =
-  | 'pickup-left'
-  | 'pickup-right'
-  | 'pickup-weapon'
-  | 'putdown-left'
-  | 'putdown-right'
-  | 'fill-left'
-  | 'fill-right'
-  | 'swing-weapon'
-  | 'putdown-weapon'
-  | 'pickup-bucket'
-  | 'dump-bucket'
-  | 'repair';
+  | 'p-l'
+  | 'p-r'
+  | 'p-w'
+  | 'pd-l'
+  | 'pd-r'
+  | 'f-l'
+  | 'f-r'
+  | 'sw'
+  | 'pd-w'
+  | 'p-b'
+  | 'd-b'
+  | 'r';
 
-export const ACTION_PICKUP_LEFT = 'pickup-left';
-export const ACTION_PICKUP_RIGHT = 'pickup-right';
-export const ACTION_PICKUP_WEAPON = 'pickup-weapon';
-export const ACTION_PICKUP_BUCKET = 'pickup-bucket';
-export const ACTION_PUTDOWN_LEFT = 'putdown-left';
-export const ACTION_PUTDOWN_RIGHT = 'putdown-right';
-export const ACTION_FILL_LEFT = 'fill-left';
-export const ACTION_FILL_RIGHT = 'fill-right';
-export const ACTION_SWING_WEAPON = 'swing-weapon';
-export const ACTION_PUTDOWN_WEAPON = 'putdown-weapon';
-export const ACTION_DUMP_BUCKET = 'dump-bucket';
-export const ACTION_REPAIR = 'repair';
+export const ACTION_PICKUP_LEFT = 'p-l';
+export const ACTION_PICKUP_RIGHT = 'p-r';
+export const ACTION_PICKUP_WEAPON = 'p-w';
+export const ACTION_PICKUP_BUCKET = 'p-b';
+export const ACTION_PUTDOWN_LEFT = 'pd-l';
+export const ACTION_PUTDOWN_RIGHT = 'pd-r';
+export const ACTION_FILL_LEFT = 'f-l';
+export const ACTION_FILL_RIGHT = 'f-r';
+export const ACTION_SWING_WEAPON = 'sw';
+export const ACTION_PUTDOWN_WEAPON = 'pd-w';
+export const ACTION_DUMP_BUCKET = 'd-b';
+export const ACTION_REPAIR = 'r';
 
 interface ActionResult {
   type: ActionType;
@@ -48,7 +48,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   const adjItemResult = game.getAdjItem([player.x, player.y]);
   let localAdjTile: Tile | undefined;
 
-  if (player.itemLeft?.name === 'sword') {
+  if (player.itemLeft?.name === 'sw') {
     localAdjTile = game.getAdjTile([player.x, player.y], [WEAPON_RACK]);
     if (localAdjTile) {
       return {
@@ -60,7 +60,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
       };
     }
   }
-  if (player.itemLeft?.name === 'bucketFull') {
+  if (player.itemLeft?.name === 'buck') {
     localAdjTile = game.getAdjTile([player.x, player.y], [OUTSIDE_WELL]);
     if (localAdjTile) {
       return {
@@ -81,10 +81,10 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   } else if (adjItemResult && (!player.itemLeft || !player.itemRight)) {
     const [item, , [x, y]] = adjItemResult;
     // if it's a full mug with an adjacent PersonPatron who is thirsty, then don't allow pickup
-    if (adjItemResult[0].name === 'mugFull') {
+    if (adjItemResult[0].name === 'mugF') {
       for (const [_x, _y] of createAdjacentIterArray([x, y])) {
         const patron = game.getPatronAt(_x, _y);
-        if (patron?.getState() === 'waitForDrink') {
+        if (patron?.getState() === 'wfd') {
           return;
         }
       }
@@ -113,7 +113,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
       tile: localAdjTile,
     };
   } else if (
-    player.itemLeft?.name === 'mugEmpty' &&
+    player.itemLeft?.name === 'mugE' &&
     game.getAdjTile([player.x, player.y], KEG_TILES)
   ) {
     return {
@@ -121,7 +121,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
       item: player.itemLeft,
     };
   } else if (
-    player.itemRight?.name === 'mugEmpty' &&
+    player.itemRight?.name === 'mugE' &&
     game.getAdjTile([player.x, player.y], KEG_TILES)
   ) {
     return {

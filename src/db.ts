@@ -49,7 +49,7 @@ export const initDbSounds = () => {
   // prettier-ignore
   dbSounds.doorClose = [1.24,,339,.12,.05,0,1,.42,-24,.1,,,.08,,-19,.6,,,,.79];
   // prettier-ignore
-  dbSounds.step = [1.07,,309,.01,.03,.03,4,.72,,60,60,.04,,,-16,,.06,.09];
+  // dbSounds.step = [1.07,,309,.01,.03,.03,4,.72,,60,60,.04,,,-16,,.06,.09];
   // prettier-ignore
   dbSounds.fill = [1.09,,0,.19,,.02,,2.31,92,-25,927,,,,-1.4,.9,,.5,.09];
   // prettier-ignore
@@ -73,7 +73,7 @@ export const initDbSounds = () => {
   dbSounds.personHit = [,,495,.05,.19,0,3,.15,.1,,,,,,.4,,,,.03,.02];
   // dbSounds.moleSpawn = [2.09,,326,.08,,0,4,.02,,4,,,.11,,28,,.1,.01,.22,.67];
   // prettier-ignore
-  dbSounds.repair = [1.04,,610,.04,.18,.04,,.79,33,,,,,.2,85,.1,,.27];
+  // dbSounds.repair = [1.04,,610,.04,.18,.04,,.79,33,,,,,.2,85,.1,,.27];
   // prettier-ignore
   dbSounds.fire = [1.06,,1028,.11,.14,.03,4,.15,-4.8,,-690,.18,,.1,,.4,.07,.99,.15];
   // prettier-ignore

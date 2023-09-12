@@ -7,21 +7,21 @@ export interface Item extends Actor {
 }
 
 export type ItemName =
-  | 'mugEmpty'
-  | 'mugFull'
-  | 'sword'
+  | 'mugE'
+  | 'mugF'
+  | 'sw'
   // | 'buoy'
-  | 'hammer'
-  | 'bucketFull';
+  // | 'hammer'
+  | 'buck';
 
 export const itemNameToLabel = (itemName: ItemName): string => {
   const labels: Record<ItemName, string> = {
-    mugEmpty: 'Mug',
-    mugFull: 'Mug',
-    sword: 'Sword',
+    mugE: 'Mug',
+    mugF: 'Mug',
+    sw: 'Sword',
     // buoy: 'Buoy',
-    hammer: 'Hammer',
-    bucketFull: 'Bucket',
+    // hammer: 'Hammer',
+    buck: 'Bucket',
   };
   return labels[itemName] ?? 'Item';
 };
@@ -30,15 +30,15 @@ export const itemNameToSprite = (itemName: ItemName) => {
   return (
     (() => {
       switch (itemName) {
-        case 'mugEmpty':
+        case 'mugE':
           return 's_30';
-        case 'mugFull':
+        case 'mugF':
           return 's_29';
-        case 'sword':
+        case 'sw':
           return 's_31';
         // case 'buoy':
         //   return 's_32';
-        case 'bucketFull':
+        case 'buck':
           return 's_34';
       }
     })() ?? 's_0'

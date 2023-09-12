@@ -129,10 +129,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
   const getNumRemainingPatrons = () =>
     cl.patrons.reduce(
-      (sum, p) =>
-        !['waitForDrink', 'findSeat', 'rioting'].includes(p.getState())
-          ? sum
-          : sum + 1,
+      (sum, p) => (!['wfd', 'f', 'r'].includes(p.getState()) ? sum : sum + 1),
       0
     );
 
@@ -485,7 +482,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         [15, 3],
         [21, 3],
       ]) {
-        cl.items.push(createItem('mugEmpty', x, y));
+        cl.items.push(createItem('mugE', x, y));
       }
     }
 
@@ -523,6 +520,8 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       levelOrch.reset();
       cl.items = [];
       setupNextLevel();
+      player.itemLeft = undefined;
+      player.itemRight = undefined;
       endLevel = false;
     },
     isPaused() {
@@ -535,8 +534,8 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
         cl.room.setTileAt(x, y, ON_FIRE);
         const item = cl.getItemAt(x, y);
         playSound('fire');
-        if (item && item.name === 'mugFull') {
-          item.name = 'mugEmpty';
+        if (item && item.name === 'mugF') {
+          item.name = 'mugE';
         }
       }
     },

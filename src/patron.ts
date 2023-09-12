@@ -30,14 +30,7 @@ import { Tile } from './room';
 import { Item } from './item';
 import { handleWallsAndDoors } from './player';
 
-type PatronStatePerson =
-  | 'findSeat'
-  | 'waitForDrink'
-  | 'drinking'
-  | 'waitForClear'
-  | 'leaving'
-  | 'rioting'
-  | 'none';
+type PatronStatePerson = 'fs' | 'wfd' | 'd' | 'wfc' | 'l' | 'r' | 'n';
 
 type PatronStateMole =
   | 'findCrate'
@@ -63,7 +56,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
   const fireTimer = new Timer(1000);
   const moleDestroyTimer = new Timer(2000);
   const waitForClearTimer = new Timer(100);
-  let patronStatePerson: PatronStatePerson = 'findSeat';
+  let patronStatePerson: PatronStatePerson = 'fs';
   let patronStateMole: PatronStateMole = 'findCrate';
   let mugItem: Item | undefined = undefined;
   let mugPoint: Point | undefined = undefined;
@@ -81,18 +74,18 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
   const typeToAnim = (type: string): Animation => {
     if (type === 'person') {
       switch (patronStatePerson) {
-        case 'findSeat':
-        case 'drinking':
-        case 'leaving':
+        case 'fs':
+        case 'd':
+        case 'l':
           return getAnim('p_walk');
-        case 'rioting':
+        case 'r':
           return getAnim('p_angry');
-        case 'waitForDrink':
+        case 'wfd':
           return patienceTimer.pct() < 0.5
             ? getAnim('p_wait')
             : getAnim('p2_wait');
-        case 'waitForClear':
-        case 'none':
+        case 'wfc':
+        case 'n':
           return getAnim('p_wait');
       }
     } else if (type === 'mole') {
@@ -103,16 +96,16 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
 
   const setPersonState = (state: PatronStatePerson) => {
     patronStatePerson = state;
-    if (state === 'waitForDrink') {
+    if (state === 'wfd') {
       patienceTimer.start();
     }
-    if (state === 'waitForClear') {
+    if (state === 'wfc') {
       waitForClearTimer.start();
     }
-    if (state === 'rioting') {
+    if (state === 'r') {
       playSound('patronAngry');
     }
-    if (state === 'leaving') {
+    if (state === 'l') {
       getGame().tileOrch.restoreTile(cl, 'Table');
     }
     typeToAnim('person').reset();
@@ -201,16 +194,16 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
 
     if (type === 'person') {
       switch (patronStatePerson) {
-        case 'findSeat': {
+        case 'fs': {
           const tile = game.tileOrch.getAvailTile(cl, 'Table');
           if (tile) {
             walkTowardsTile(tile, () => {
-              setPersonState('waitForDrink');
+              setPersonState('wfd');
             });
           }
           break;
         }
-        case 'leaving': {
+        case 'l': {
           const tile = game.tileOrch.getAvailTile(cl, 'Exit');
           if (tile) {
             walkTowardsTile(tile, () => {
@@ -261,14 +254,11 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
     const game = getGame();
     updateWalkPosition('person');
 
-    if (
-      patronStatePerson === 'waitForDrink' ||
-      patronStatePerson === 'rioting'
-    ) {
-      if (patienceTimer.isDone() && patronStatePerson !== 'rioting') {
-        setPersonState('rioting');
+    if (patronStatePerson === 'wfd' || patronStatePerson === 'r') {
+      if (patienceTimer.isDone() && patronStatePerson !== 'r') {
+        setPersonState('r');
         fireTimer.start();
-      } else if (patronStatePerson === 'rioting') {
+      } else if (patronStatePerson === 'r') {
         if (fireTimer.isDone()) {
           if (Math.random() > 0.95) {
             game.setAdjTableOnFire(cl.getPos());
@@ -278,31 +268,31 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
       }
       const adjItemResp = game.getAdjItem(cl.getPos());
       const adjItem = adjItemResp?.[0];
-      if (adjItem?.name === 'mugFull' && !adjItem?.remv) {
+      if (adjItem?.name === 'mugF' && !adjItem?.remv) {
         adjItem.remv = true;
         mugItem = adjItem;
         mugPoint = adjItemResp?.[2] as Point;
-        setPersonState('drinking');
+        setPersonState('d');
         drinkTimer.start();
       }
-    } else if (patronStatePerson === 'drinking') {
+    } else if (patronStatePerson === 'd') {
       if (drinkTimer.isDone() && mugItem && mugPoint) {
-        setPersonState('waitForClear');
+        setPersonState('wfc');
         mugItem.remv = false;
         mugItem.x = mugPoint[0];
         mugItem.y = mugPoint[1];
-        mugItem.name = 'mugEmpty';
+        mugItem.name = 'mugE';
         game.items.push(mugItem);
         mugItem = undefined;
       }
-    } else if (patronStatePerson === 'waitForClear') {
+    } else if (patronStatePerson === 'wfc') {
       if (waitForClearTimer.isDone()) {
         if (game.room.isTileVisible(cl.x, cl.y)) {
           playSound('plusOne');
         }
         game.levelOrch.incScore();
         game.particles.push(createParticle('part_+1_l', 300, cl.x, cl.y));
-        setPersonState('leaving');
+        setPersonState('l');
       }
       // const itemOnGround = getGame().getItemAt(cl.x, cl.y);
       // if (!itemOnGround) {
@@ -368,7 +358,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
 
       drawSprite(sprite, cl.x * 16, cl.y * 16);
 
-      if (patronStatePerson === 'drinking' && mugItem) {
+      if (patronStatePerson === 'd' && mugItem) {
         // drawSprite('mugFull', cl.x * 16, cl.y * 16);
         mugItem.drawAt(cl.x * 16 + 2, cl.y * 16 + 2);
       }

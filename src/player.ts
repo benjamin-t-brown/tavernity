@@ -114,7 +114,7 @@ export const createPlayer = () => {
 
   const handleFillMug = (mugItem: Item) => {
     playSound('fill');
-    mugItem.name = 'mugFull';
+    mugItem.name = 'mugF';
   };
 
   const handleSwingWeapon = () => {
@@ -124,7 +124,7 @@ export const createPlayer = () => {
       playSound('swingSword');
       for (const [x, y] of createAdjacentIterArray([cl.x, cl.y])) {
         const patron = game.getPatronAt(x, y);
-        if (patron?.getState() === 'rioting' || patron?.type === 'mole') {
+        if (patron?.getState() === 'r' || patron?.type === 'mole') {
           const tileBeneath = game.room.getTileAt(x, y);
           if (tileBeneath[0] !== RUBBLE) {
             game.fParticles.push(createParticle('bloodf_l', Infinity, x, y));
@@ -161,8 +161,8 @@ export const createPlayer = () => {
         game.room.setTileAt(x, y, RUBBLE);
         for (const [x2, y2] of createAdjacentIterArray([x, y])) {
           const patron = game.getPatronAt(x2, y2);
-          if (patron?.getState() === 'rioting') {
-            patron.setPersonState('waitForDrink');
+          if (patron?.getState() === 'r') {
+            patron.setPersonState('wfd');
           }
         }
       }
@@ -176,7 +176,7 @@ export const createPlayer = () => {
     const origTile = game.room.getTileAt(x, y, true);
     const [origId] = origTile;
     tile[0] = origId;
-    playSound('repair');
+    playSound('fill');
   };
 
   const areKeysDown = (keys: string[]) => {
@@ -253,16 +253,16 @@ export const createPlayer = () => {
           handlePickupItem(item as Item);
         },
         [ACTION_PICKUP_WEAPON]: () => {
-          handlePickupItemBothHands('sword');
+          handlePickupItemBothHands('sw');
         },
         [ACTION_PICKUP_BUCKET]: () => {
-          handlePickupItemBothHands('bucketFull');
+          handlePickupItemBothHands('buck');
         },
         [ACTION_PUTDOWN_LEFT]: () => {
           handlePutDownItemOnTable('Left', tile as Tile);
         },
         [ACTION_PUTDOWN_RIGHT]: () => {
-          if (cl.itemLeft?.name === 'mugFull') {
+          if (cl.itemLeft?.name === 'mugF') {
             handlePutDownItemOnTable('Left', tile as Tile);
             cl.itemLeft = cl.itemRight;
             cl.itemRight = undefined;
