@@ -131,13 +131,9 @@ export const createPlayer = () => {
           }
           game.particles.push(createParticle('blood_l', 300, x, y));
           patron.remv = true;
-          playSound('hitSomething');
+          playSound('hitS');
           setTimeout(() => {
-            if (patron?.type === 'mole') {
-              playSound('moleDead');
-            } else {
-              playSound('personHit');
-            }
+            playSound('moleDead');
           }, 300);
           break;
         }

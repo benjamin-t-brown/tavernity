@@ -100,7 +100,7 @@ window.addEventListener('keydown', (e) => {
     console.log('minus canv');
   }
 
-  localStorage.setItem('js13k2023_tavernity_width', String(cWidth));
+  localStorage.setItem('js13k_tavernity_w', String(cWidth));
 });
 window.addEventListener('keyup', (e) => {
   keys[e.key] = false;

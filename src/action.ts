@@ -48,8 +48,10 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   const adjItemResult = game.getAdjItem([player.x, player.y]);
   let localAdjTile: Tile | undefined;
 
+  const getAdjTile = game.getAdjTile;
+
   if (player.itemLeft?.name === 'sw') {
-    localAdjTile = game.getAdjTile([player.x, player.y], [WEAPON_RACK]);
+    localAdjTile = getAdjTile([player.x, player.y], [WEAPON_RACK]);
     if (localAdjTile) {
       return {
         type: ACTION_PUTDOWN_WEAPON,
@@ -61,7 +63,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
     }
   }
   if (player.itemLeft?.name === 'buck') {
-    localAdjTile = game.getAdjTile([player.x, player.y], [OUTSIDE_WELL]);
+    localAdjTile = getAdjTile([player.x, player.y], [OUTSIDE_WELL]);
     if (localAdjTile) {
       return {
         type: ACTION_PICKUP_BUCKET,
@@ -73,7 +75,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
     }
   }
 
-  if ((localAdjTile = game.getAdjTile([player.x, player.y], [RUBBLE]))) {
+  if ((localAdjTile = getAdjTile([player.x, player.y], [RUBBLE]))) {
     return {
       type: ACTION_REPAIR,
       tile: localAdjTile,
@@ -97,7 +99,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   } else if (
     !player.itemLeft &&
     !player.itemRight &&
-    (localAdjTile = game.getAdjTile([player.x, player.y], [WEAPON_RACK]))
+    (localAdjTile = getAdjTile([player.x, player.y], [WEAPON_RACK]))
   ) {
     return {
       type: ACTION_PICKUP_WEAPON,
@@ -106,7 +108,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   } else if (
     !player.itemLeft &&
     !player.itemRight &&
-    (localAdjTile = game.getAdjTile([player.x, player.y], [OUTSIDE_WELL]))
+    (localAdjTile = getAdjTile([player.x, player.y], [OUTSIDE_WELL]))
   ) {
     return {
       type: ACTION_PICKUP_BUCKET,
@@ -114,7 +116,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
     };
   } else if (
     player.itemLeft?.name === 'mugE' &&
-    game.getAdjTile([player.x, player.y], KEG_TILES)
+    getAdjTile([player.x, player.y], KEG_TILES)
   ) {
     return {
       type: ACTION_FILL_LEFT,
@@ -122,7 +124,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
     };
   } else if (
     player.itemRight?.name === 'mugE' &&
-    game.getAdjTile([player.x, player.y], KEG_TILES)
+    getAdjTile([player.x, player.y], KEG_TILES)
   ) {
     return {
       type: ACTION_FILL_RIGHT,
@@ -131,7 +133,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   } else if (
     player.itemRight &&
     !['sword'].includes(player.itemRight.name) &&
-    (localAdjTile = game.getAdjTile([player.x, player.y], TABLE_TILES)) &&
+    (localAdjTile = getAdjTile([player.x, player.y], TABLE_TILES)) &&
     !game.getItemAt(localAdjTile[1], localAdjTile[2])
   ) {
     return {
@@ -142,7 +144,7 @@ export const getAvailableAction = (game: Game): ActionResult | undefined => {
   } else if (
     player.itemLeft &&
     !['sword'].includes(player.itemLeft.name) &&
-    (localAdjTile = game.getAdjTile([player.x, player.y], TABLE_TILES)) &&
+    (localAdjTile = getAdjTile([player.x, player.y], TABLE_TILES)) &&
     !game.getItemAt(localAdjTile[1], localAdjTile[2])
   ) {
     return {

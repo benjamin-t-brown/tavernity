@@ -129,7 +129,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
 
   const getNumRemainingPatrons = () =>
     cl.patrons.reduce(
-      (sum, p) => (!['wfd', 'f', 'r'].includes(p.getState()) ? sum : sum + 1),
+      (sum, p) => (!['wfd', 'fs', 'r'].includes(p.getState()) ? sum : sum + 1),
       0
     );
 
@@ -162,9 +162,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
   const showLevelMessageScreen = () => {
     setupNextLevel();
     cl.update(1);
-    levelMessageText =
-      LevelMessages[cl.levelOrch.getTotalLevel()] ??
-      'And they just keep coming...';
+    levelMessageText = LevelMessages[cl.levelOrch.getTotalLevel()] ?? '...';
     levelMessageScreen = true;
   };
 
@@ -295,7 +293,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       align: 'center',
     });
     drawText(
-      'Press (SPACE) to continue.',
+      'Press (SPACE) to start.',
       width / 2,
       height / 2 + 2 * 16 * scale + 16,
       {
@@ -343,12 +341,12 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       height / 2 + 3 * 12 * scale,
       subTextParams
     );
-    drawText(
-      'Press (SPACE) to start',
-      width / 2,
-      height / 2 + 4 * 12 * scale + 16,
-      subTextParams
-    );
+    // drawText(
+    //   'Press (SPACE) to start',
+    //   width / 2,
+    //   height / 2 + 4 * 12 * scale + 16,
+    //   subTextParams
+    // );
   };
 
   const drawLevelMessageScreen = () => {
@@ -398,15 +396,15 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       }
     );
 
-    drawText(
-      'Press (SPACE) to start',
-      width / 2,
-      height / 2 + 4 * 12 * scale + 16,
-      {
-        size: 24,
-        align: 'center',
-      }
-    );
+    // drawText(
+    //   'Press (SPACE) to start',
+    //   width / 2,
+    //   height / 2 + 4 * 12 * scale + 16,
+    //   {
+    //     size: 24,
+    //     align: 'center',
+    //   }
+    // );
   };
 
   const drawUi = () => {
@@ -426,10 +424,10 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
     //   align: 'left',
     // });
 
-    drawText(`Level: ${levelOrch.getTotalLevel()}`, 16, height - 16, {
-      size: 24,
-      align: 'left',
-    });
+    // drawText(`Level: ${levelOrch.getTotalLevel()}`, 16, height - 16, {
+    //   size: 24,
+    //   align: 'left',
+    // });
 
     if (endLevel) {
       drawText(`Level ending soon...`, width / 2, 128, {
@@ -617,7 +615,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
       }
       if (getNumRemainingPatrons() > 0 && spawnOrch.lvlTimer.isDone()) {
         // console.log('GAME OVER');
-        playSound('gameOver');
+        // playSound('gameOver');
         showGameOverScreen();
       }
       // if (!isPaused() && !endLevel
@@ -625,18 +623,21 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
     draw() {
       const ctx = getCtx();
 
+      let returnEarly = false;
+
       if (menu) {
         drawMenu();
-        return;
+        returnEarly = true;
       }
-
       if (endOfLevelScreen) {
         drawEndOfLevelScreen();
-        return;
+        returnEarly = true;
       }
-
       if (gameOverScreen) {
         drawGameOverScreen();
+        returnEarly = true;
+      }
+      if (returnEarly) {
         return;
       }
 
@@ -673,7 +674,7 @@ export function createGame(tiles: number[], mapWidth: number, spawns: Point[]) {
             nextLabel = `Pick up Sword ${keypress}`;
             break;
           case ACTION_PICKUP_BUCKET:
-            nextLabel = `Pick up Water Bucket ${keypress}`;
+            nextLabel = `Pick up Water ${keypress}`;
             break;
           case ACTION_PUTDOWN_LEFT:
           case ACTION_PUTDOWN_RIGHT:

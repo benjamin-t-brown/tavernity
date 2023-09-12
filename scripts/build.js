@@ -170,7 +170,7 @@ const build = async () => {
   console.log('\nZip (command line)...');
   try {
     await execAsync(
-      `cd dist && zip -9 ${zipFilePath} index.html *.js res/*.png`
+      `cd dist && zip -9 ${zipFilePath} index.html *.js res/*.png res/*.json`
     );
     console.log(await execAsync(`stat -c '%n %s' ${zipFilePath}`));
   } catch (e) {

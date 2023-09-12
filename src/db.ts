@@ -68,16 +68,16 @@ export const initDbSounds = () => {
   // prettier-ignore
   dbSounds.dumpBucket = [1.99,,246,,.07,.03,4,.66,47,32,,,,,-0.4,,.25,,.13,.83];
   // prettier-ignore
-  dbSounds.hitSomething = [1.04,,772,,.07,.06,2,.31,90,-15,590,.02,,,,.3,,.47,.03];
+  dbSounds.hitS = [1.04,,772,,.07,.06,2,.31,90,-15,590,.02,,,,.3,,.47,.03];
   // prettier-ignore
-  dbSounds.personHit = [,,495,.05,.19,0,3,.15,.1,,,,,,.4,,,,.03,.02];
+  // dbSounds.personHit = [,,495,.05,.19,0,3,.15,.1,,,,,,.4,,,,.03,.02];
   // dbSounds.moleSpawn = [2.09,,326,.08,,0,4,.02,,4,,,.11,,28,,.1,.01,.22,.67];
   // prettier-ignore
   // dbSounds.repair = [1.04,,610,.04,.18,.04,,.79,33,,,,,.2,85,.1,,.27];
   // prettier-ignore
   dbSounds.fire = [1.06,,1028,.11,.14,.03,4,.15,-4.8,,-690,.18,,.1,,.4,.07,.99,.15];
   // prettier-ignore
-  dbSounds.destroyCrate = [,,80,.04,.03,.2,4,.34,-0.3,,,,,,-9.9,,,,.18];
+  dbSounds.dc = [,,80,.04,.03,.2,4,.34,-0.3,,,,,,-9.9,,,,.18];
   // prettier-ignore
   dbSounds.levelDone = [1.04,,3,.06,.09,.09,1,.84,,14,,,,,5.2,,,.43,.13];
   // prettier-ignore
@@ -85,7 +85,7 @@ export const initDbSounds = () => {
   // prettier-ignore
   dbSounds.startLevel = [1.05,,0,.01,.17,.17,1,1.56,,73,225,.01,.09,,-0.1,,,.43];
   // prettier-ignore
-  dbSounds.gameOver = [1.7,,146,.22,.07,.18,4,2.48,,82,,,,,253,,.21,,,.01];
+  // dbSounds.gameOver = [1.7,,146,.22,.07,.18,4,2.48,,82,,,,,253,,.21,,,.01];
   // prettier-ignore
   dbSounds.timerTick = [,,1091,.18,.02,.17,4,.91,,-42,,,,,167,,,,.02];
 

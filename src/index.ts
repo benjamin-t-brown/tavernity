@@ -1,6 +1,7 @@
 import { initDb } from './db';
 import { clearScreen, getCanvas, loadImagesAndSprites, setFm } from './draw';
 import { Game, createGame } from './game';
+import { map } from './map';
 import { normalize } from './utils';
 import { setVolume } from './zzfx';
 
@@ -17,17 +18,17 @@ export const start = async () => {
 const load = async () => {
   console.log('loading...');
   await loadImagesAndSprites([['sprite', 'res/sprite.png', 16, 16]]);
-  const map = await (await fetch('res/map.json')).json();
+  // const map = await (await fetch('res/map.json')).json();
   console.log('loaded', map);
   initDb();
 
-  const cWidth = Number(localStorage.getItem('js13k2023_tavernity_width'));
+  const cWidth = Number(localStorage.getItem('js13k_tavernity_w'));
   if (!isNaN(cWidth) && cWidth > 0) {
     const canvas = getCanvas();
     canvas.style.width = cWidth + 'px';
   }
 
-  loop(createGame(map.tiles, map.width, map.spawns));
+  loop(createGame(map.tiles, map.width, map.spawns as any));
 };
 
 const loop = (game: Game) => {
@@ -40,7 +41,7 @@ const loop = (game: Game) => {
   const _loop = () => {
     const now = performance.now();
     let frameTime = now - prevNow;
-    let prevFrameTime = Math.floor(frameTime);
+    // let prevFrameTime = Math.floor(frameTime);
     prevNow = now;
 
     if (frameTime > 4) {
@@ -70,5 +71,5 @@ const loop = (game: Game) => {
 (window as any).vol = (input: HTMLInputElement) => {
   const v = (Number(input.value) * 0.3) / 100;
   setVolume(v);
-  console.log('SET VOL', v)
+  console.log('SET VOL', v);
 };

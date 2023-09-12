@@ -65,7 +65,14 @@ export const createRoom = (
     visMaps: createVisibilityMaps(tiles, roomWidth),
     tiles: originalTiles,
     reset: (level: number) => {
-      const tiles = structuredClone(originalTiles);
+      // const tiles = JSON.parse(JSON.stringify(originalTiles));
+      //
+      // Lul:
+      // The game should start without error
+      // got 1 errors:
+      //   <url>/0aad9779d7aba4d0a681b4312032f0c3/index.js 0:21711 Uncaught ReferenceError: structuredClone is not defined
+      // const tiles = structuredClone(originalTiles);
+      const tiles: Tile[] = originalTiles.map((t) => [...t]);
       for (let i = 0; i < tiles.length; i++) {
         const tile = tiles[i];
         const maxLevel = cl.getTileLevel(tile, true);
@@ -125,7 +132,7 @@ export const createRoom = (
     draw: () => {
       for (let i = 0; i < roomWidth; i++) {
         for (let j = 0; j < roomWidth; j++) {
-          let [tileId] = cl.tiles[j + i * roomWidth];
+          let [tileId] = cl.tiles[j + i * roomWidth] ?? [0];
           const isVisible = cl.isTileVisible(j, i, visMapInds);
           if (tileId && isVisible) {
             if (tileId === ON_FIRE) {

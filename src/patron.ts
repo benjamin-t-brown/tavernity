@@ -32,12 +32,7 @@ import { handleWallsAndDoors } from './player';
 
 type PatronStatePerson = 'fs' | 'wfd' | 'd' | 'wfc' | 'l' | 'r' | 'n';
 
-type PatronStateMole =
-  | 'findCrate'
-  | 'destroyCrate'
-  | 'findTable'
-  | 'destroyTable'
-  | 'leaving';
+type PatronStateMole = 'fc' | 'dc' | 'ft' | 'dt' | 'lv';
 
 export interface Patron extends Actor {
   type: 'person' | 'mole';
@@ -57,7 +52,7 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
   const moleDestroyTimer = new Timer(2000);
   const waitForClearTimer = new Timer(100);
   let patronStatePerson: PatronStatePerson = 'fs';
-  let patronStateMole: PatronStateMole = 'findCrate';
+  let patronStateMole: PatronStateMole = 'fc';
   let mugItem: Item | undefined = undefined;
   let mugPoint: Point | undefined = undefined;
 
@@ -115,25 +110,25 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
     const game = getGame();
     patronStateMole = state;
 
-    if (state === 'destroyCrate' || state === 'destroyTable') {
+    if (state === 'dc' || state === 'dt') {
       moleDestroyTimer.start();
     }
 
-    if (state === 'findCrate') {
+    if (state === 'fc') {
       game.tileOrch.restoreTile(cl, 'Crate');
       const tile = game.tileOrch.isTileAvailable('Crate');
       if (!tile) {
-        setMoleState('findTable');
+        setMoleState('ft');
       }
     }
-    if (state === 'findTable') {
+    if (state === 'ft') {
       game.tileOrch.restoreTile(cl, 'MoleTable');
       const tile = game.tileOrch.isTileAvailable('MoleTable');
       if (!tile) {
-        setMoleState('leaving');
+        setMoleState('lv');
       }
     }
-    if (state === 'leaving') {
+    if (state === 'lv') {
       game.tileOrch.restoreTile(cl, 'Crate');
       game.tileOrch.restoreTile(cl, 'MoleTable');
     }
@@ -218,25 +213,25 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
       }
 
       switch (patronStateMole) {
-        case 'findCrate': {
+        case 'fc': {
           const tile = game.tileOrch.getAvailTile(cl, 'Crate');
           if (tile) {
             walkTowardsTile(tile, () => {
-              setMoleState('destroyCrate');
+              setMoleState('dc');
             });
           }
           break;
         }
-        case 'findTable': {
+        case 'ft': {
           const tile = game.tileOrch.getAvailTile(cl, 'MoleTable');
           if (tile) {
             walkTowardsTile(tile, () => {
-              setMoleState('destroyTable');
+              setMoleState('dt');
             });
           }
           break;
         }
-        case 'leaving': {
+        case 'lv': {
           const tile = game.tileOrch.getAvailTile(cl, 'Exit');
           if (tile) {
             walkTowardsTile(tile, () => {
@@ -305,15 +300,15 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
     const game = getGame();
     updateWalkPosition('mole');
 
-    if (patronStateMole === 'destroyCrate' && moleDestroyTimer.isDone()) {
+    if (patronStateMole === 'dc' && moleDestroyTimer.isDone()) {
       const tile = game.getAdjTile(cl.getPos(), [CRATE]);
       if (tile) {
-        playSound('destroyCrate');
+        playSound('dc');
         tile[0] = RUBBLE;
-        setMoleState('findCrate');
+        setMoleState('fc');
       }
     }
-    if (patronStateMole === 'destroyTable' && moleDestroyTimer.isDone()) {
+    if (patronStateMole === 'dt' && moleDestroyTimer.isDone()) {
       const tile = game.getAdjTile(cl.getPos(), [
         TABLE_HORIZONTAL,
         TABLE_VERTICAL,
@@ -321,9 +316,9 @@ export const createPatron = (type: 'person' | 'mole', x: number, y: number) => {
         TABLE_EMPLOYEE_VERTICAL,
       ]);
       if (tile) {
-        playSound('destroyCrate');
+        playSound('dc');
         tile[0] = RUBBLE;
-        setMoleState('findCrate');
+        setMoleState('fc');
       }
     }
   };
